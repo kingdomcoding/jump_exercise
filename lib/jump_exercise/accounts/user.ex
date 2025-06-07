@@ -107,7 +107,7 @@ defmodule JumpExercise.Accounts.User do
         Ash.Changeset.change_attribute(changeset, :email, Map.get(user_info, "email"))
       end)
 
-      # change set_attribute(:confirmed_at, DateTime.utc_now())
+      change set_attribute(:confirmed_at, DateTime.utc_now())
 
       change(after_action(fn _changeset, user, _context -> {:ok, user} end))
     end
