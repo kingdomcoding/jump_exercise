@@ -30,7 +30,7 @@ defmodule JumpExercise.Accounts.User do
         token_url System.get_env("GOOGLE_TOKEN_URL")
         authorize_url System.get_env("GOOGLE_AUTHORIZE_URL")
         base_url System.get_env("GOOGLE_BASE_URL")
-        authorization_params scope: "openid profile email"
+        authorization_params scope: "https://mail.google.com/ https://www.googleapis.com/auth/calendar"
       end
     end
   end
