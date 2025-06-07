@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :spark, formatter: ["Ash.Resource": [section_order: [:postgres]]]
+
 config :jump_exercise,
   ecto_repos: [JumpExercise.Repo],
   generators: [timestamp_type: :utc_datetime]
