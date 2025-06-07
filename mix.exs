@@ -33,6 +33,7 @@ defmodule JumpExercise.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:picosat_elixir, "~> 0.2"},
