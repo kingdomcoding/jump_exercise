@@ -33,6 +33,7 @@ defmodule JumpExercise.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:ash_authentication_phoenix, "~> 2.0"},
       {:picosat_elixir, "~> 0.2"},
       {:ash_authentication, "~> 4.0"},
       {:ash_phoenix, "~> 2.0"},
@@ -84,7 +85,8 @@ defmodule JumpExercise.MixProject do
         "tailwind jump_exercise --minify",
         "esbuild jump_exercise --minify",
         "phx.digest"
-      ]
+      ],
+      "phx.routes": ["phx.routes", "ash_authentication.phoenix.routes"]
     ]
   end
 end
