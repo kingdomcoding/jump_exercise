@@ -1,4 +1,6 @@
 import Config
+config :jump_exercise, token_signing_secret: "7o3CXKn1C0lv3M62yB/RpOcXlbFfZaKM"
+config :bcrypt_elixir, log_rounds: 1
 
 # Configure your database
 #

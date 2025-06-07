@@ -17,7 +17,8 @@ defmodule JumpExercise.Application do
       # Start a worker by calling: JumpExercise.Worker.start_link(arg)
       # {JumpExercise.Worker, arg},
       # Start to serve requests, typically the last entry
-      JumpExerciseWeb.Endpoint
+      JumpExerciseWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :jump_exercise]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

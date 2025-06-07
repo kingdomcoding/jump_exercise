@@ -63,7 +63,7 @@ config :jump_exercise, JumpExerciseWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :jump_exercise, dev_routes: true
+config :jump_exercise, dev_routes: true, token_signing_secret: "SORgBD+JecW9bAIpnua/PB+UhQoEEdh8"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

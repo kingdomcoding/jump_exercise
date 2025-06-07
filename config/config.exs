@@ -7,11 +7,12 @@
 # General application configuration
 import Config
 
-config :spark, formatter: ["Ash.Resource": [section_order: [:postgres]]]
+config :spark, formatter: ["Ash.Resource": [section_order: [:authentication, :tokens, :postgres]]]
 
 config :jump_exercise,
   ecto_repos: [JumpExercise.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  ash_domains: [JumpExercise.Accounts]
 
 # Configures the endpoint
 config :jump_exercise, JumpExerciseWeb.Endpoint,
