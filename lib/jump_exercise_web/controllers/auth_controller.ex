@@ -15,7 +15,6 @@ defmodule JumpExerciseWeb.AuthController do
           |> put_flash(:error, "Could not register or sign in")
           |> redirect(to: ~p"/sign-in")
       end
-      |> dbg()
     else
       {:error, _reason} ->
         conn
