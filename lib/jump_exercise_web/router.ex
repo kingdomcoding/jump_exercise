@@ -43,7 +43,8 @@ defmodule JumpExerciseWeb.Router do
   scope "/", JumpExerciseWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    get "/", PageController, :redirect_to_chat
+    # redirect "/", "/chat"
     get "/gmail/emails", GmailController, :fetch_gmail_emails
     get "/auth/user/google/callback", AuthController, :google_callback
     auth_routes AuthController, JumpExercise.Accounts.User, path: "/auth"
