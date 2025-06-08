@@ -82,6 +82,11 @@ defmodule JumpExerciseWeb.Router do
     )
   end
 
+  scope "/api/gmail", JumpExerciseWeb do
+    post "/webhook", GmailWebhookController, :notify
+    get "/webhook", GmailWebhookController, :notify
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", JumpExerciseWeb do
   #   pipe_through :api

@@ -1,4 +1,6 @@
 defmodule JumpExercise.Gmail.GmailApi do
+  @history_url "https://gmail.googleapis.com/gmail/v1/users/me/history"
+
   def send_email(user, to, subject, body) do
     access_token = get_access_token_for_user(user)
 
@@ -28,6 +30,45 @@ defmodule JumpExercise.Gmail.GmailApi do
     case HTTPoison.post(url, payload, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: resp_body}} ->
         {:ok, Jason.decode!(resp_body)}
+
+      {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
+        {:error, code, Jason.decode!(resp_body)}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def fetch_new_emails(user, history_id) do
+    access_token = get_access_token_for_user(user)
+
+    headers = [
+      {"Authorization", "Bearer #{access_token}"},
+      {"Accept", "application/json"}
+    ]
+
+    params =
+      URI.encode_query(%{
+        "startHistoryId" => history_id,
+        "historyTypes" => "messageAdded"
+      })
+
+    url = "#{@history_url}?#{params}"
+
+    case HTTPoison.get(url, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        history = Jason.decode!(body)
+
+        messages =
+          history["history"]
+          |> List.wrap()
+          |> Enum.flat_map(fn h -> h["messages"] || [] end)
+          |> Enum.uniq_by(& &1["id"])
+
+        # Fetch full message details for each new message
+        Enum.map(messages, fn %{"id" => id} ->
+          get_email(user, id)
+        end)
 
       {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
         {:error, code, Jason.decode!(resp_body)}
