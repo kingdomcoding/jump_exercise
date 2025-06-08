@@ -18,7 +18,13 @@ defmodule JumpExercise.Accounts.User do
         confirm_on_update? false
         require_interaction? true
         confirmed_at_field :confirmed_at
-        auto_confirm_actions [:register_with_google, :sign_in_with_magic_link, :reset_password_with_token]
+
+        auto_confirm_actions [
+          :register_with_google,
+          :sign_in_with_magic_link,
+          :reset_password_with_token
+        ]
+
         sender JumpExercise.Accounts.User.Senders.SendNewUserConfirmationEmail
       end
     end
@@ -40,7 +46,10 @@ defmodule JumpExercise.Accounts.User do
         token_url JumpExercise.Accounts.Secrets
         authorize_url JumpExercise.Accounts.Secrets
         base_url JumpExercise.Accounts.Secrets
-        authorization_params scope: "https://mail.google.com/ https://www.googleapis.com/auth/calendar openid email profile"
+
+        authorization_params scope:
+                               "https://mail.google.com/ https://www.googleapis.com/auth/calendar openid email profile"
+
         identity_resource JumpExercise.Accounts.UserIdentity
       end
 

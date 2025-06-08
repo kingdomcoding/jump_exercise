@@ -2,7 +2,8 @@ defmodule JumpExerciseWeb.GmailController do
   use JumpExerciseWeb, :controller
 
   def fetch_gmail_emails(conn, _params) do
-    access_token = get_access_token_for_user(conn) # Implement this to retrieve the user's token
+    # Implement this to retrieve the user's token
+    access_token = get_access_token_for_user(conn)
 
     headers = [
       {"Authorization", "Bearer #{access_token}"},
@@ -20,6 +21,7 @@ defmodule JumpExerciseWeb.GmailController do
       Enum.map(messages |> Enum.take(5), fn %{"id" => id} ->
         {:ok, %HTTPoison.Response{body: msg_body, status_code: 200}} =
           HTTPoison.get("https://gmail.googleapis.com/gmail/v1/users/me/messages/#{id}", headers)
+
         Jason.decode!(msg_body)
       end)
 
@@ -30,7 +32,9 @@ defmodule JumpExerciseWeb.GmailController do
 
   defp get_access_token_for_user(conn) do
     case conn.assigns[:current_user] do
-      nil -> nil
+      nil ->
+        nil
+
       user ->
         {:ok, user} = Ash.load(user, :identities)
 

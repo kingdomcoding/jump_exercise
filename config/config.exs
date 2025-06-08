@@ -7,12 +7,21 @@
 # General application configuration
 import Config
 
+config :ash_oban, pro?: false
+
+config :jump_exercise, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10, chat_responses: [limit: 10], conversations: [limit: 10]],
+  repo: JumpExercise.Repo,
+  plugins: [{Oban.Plugins.Cron, []}]
+
 config :spark, formatter: ["Ash.Resource": [section_order: [:authentication, :tokens, :postgres]]]
 
 config :jump_exercise,
   ecto_repos: [JumpExercise.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [JumpExercise.Accounts]
+  ash_domains: [JumpExercise.Chat, JumpExercise.Accounts]
 
 # Configures the endpoint
 config :jump_exercise, JumpExerciseWeb.Endpoint,
