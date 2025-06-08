@@ -17,7 +17,9 @@ import Config
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
 if System.get_env("PHX_SERVER") do
-  config :jump_exercise, JumpExerciseWeb.Endpoint, server: true
+  config :jump_exercise, JumpExerciseWeb.Endpoint,
+    server: true,
+    check_origin: ["https://jump-exercise.onrender.com"]
 end
 
 if config_env() == :prod do
