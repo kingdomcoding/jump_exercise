@@ -1,6 +1,28 @@
 defmodule JumpExerciseWeb.AuthController do
   use JumpExerciseWeb, :controller
   use AshAuthentication.Phoenix.Controller
+  alias JumpExerciseWeb.GoogleOAuth2
+
+  def google_callback(conn, %{"code" => code}) do
+    with {:ok, tokens} <- GoogleOAuth2.exchange_code_for_tokens(code),
+         {:ok, user_info} <- GoogleOAuth2.fetch_user_info(tokens) do
+      case JumpExercise.Accounts.User.register_with_google(user_info, tokens) do
+        {:ok, user} ->
+          success(conn, {:google, :callback}, user, "demo_token")
+
+        {:error, _reason} ->
+          conn
+          |> put_flash(:error, "Could not register or sign in")
+          |> redirect(to: ~p"/sign-in")
+      end
+      |> dbg()
+    else
+      {:error, _reason} ->
+        conn
+        |> put_flash(:error, "Error authenticating with google")
+        |> redirect(to: ~p"/sign-in")
+    end
+  end
 
   def success(conn, activity, user, _token) do
     return_to = get_session(conn, :return_to) || ~p"/"
@@ -22,6 +44,7 @@ defmodule JumpExerciseWeb.AuthController do
   end
 
   def failure(conn, activity, reason) do
+    # dbg(reason)
     message =
       case {activity, reason} do
         {_,

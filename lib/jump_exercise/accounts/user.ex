@@ -42,7 +42,7 @@ defmodule JumpExercise.Accounts.User do
         base_url System.get_env("GOOGLE_BASE_URL")
 
         authorization_params scope:
-                               "https://mail.google.com/ https://www.googleapis.com/auth/calendar"
+                               "https://mail.google.com/ https://www.googleapis.com/auth/calendar openid email profile"
       end
 
       password :password do
@@ -64,8 +64,8 @@ defmodule JumpExercise.Accounts.User do
       authorize_if(always())
     end
 
-    policy(always()) do
-      forbid_if(always())
+    policy action(:register_with_google) do
+      authorize_if(always())
     end
   end
 
@@ -83,7 +83,7 @@ defmodule JumpExercise.Accounts.User do
     end
 
     attribute :hashed_password, :string do
-      allow_nil?(false)
+      allow_nil?(true)
       sensitive?(true)
     end
 
@@ -110,10 +110,6 @@ defmodule JumpExercise.Accounts.User do
       change(set_attribute(:confirmed_at, DateTime.utc_now()))
 
       change(after_action(fn _changeset, user, _context -> {:ok, user} end))
-
-      change(fn changeset, _context ->
-        dbg(changeset)
-      end)
     end
 
     update :change_password do
@@ -295,6 +291,10 @@ defmodule JumpExercise.Accounts.User do
       get?(true)
       prepare(AshAuthentication.Preparations.FilterBySubject)
     end
+  end
+
+  code_interface do
+    define(:register_with_google, args: [:user_info, :oauth_tokens])
   end
 
   identities do
