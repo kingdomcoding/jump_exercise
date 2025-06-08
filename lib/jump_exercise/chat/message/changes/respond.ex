@@ -32,7 +32,7 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
       %{
         llm:
           ChatOpenAI.new!(%{
-            model: "gpt-4o",
+            model: "gpt-4.1-nano",
             stream: true,
             custom_context: Map.new(Ash.Context.to_opts(context))
           })
