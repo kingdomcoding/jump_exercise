@@ -1,4 +1,42 @@
 defmodule JumpExercise.Gmail.GmailApi do
+  def send_email(user, to, subject, body) do
+    access_token = get_access_token_for_user(user)
+
+    headers = [
+      {"Authorization", "Bearer #{access_token}"},
+      {"Content-Type", "application/json"}
+    ]
+
+    from = get_header_from_user(user) || "me"
+
+    raw_message =
+      """
+      From: #{from}
+      To: #{to}
+      Subject: #{subject}
+      Content-Type: text/plain; charset="UTF-8"
+
+      #{body}
+      """
+      |> :erlang.iolist_to_binary()
+      |> Base.encode64()
+
+    payload = Jason.encode!(%{raw: raw_message})
+
+    url = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
+
+    case HTTPoison.post(url, payload, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: resp_body}} ->
+        {:ok, Jason.decode!(resp_body)}
+
+      {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
+        {:error, code, Jason.decode!(resp_body)}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   def list_emails(user, _params) do
     access_token = get_access_token_for_user(user)
 
@@ -121,4 +159,7 @@ defmodule JumpExercise.Gmail.GmailApi do
       identity && identity.access_token
     end)
   end
+
+  defp get_header_from_user(%{email: email}), do: email
+  defp get_header_from_user(_), do: nil
 end

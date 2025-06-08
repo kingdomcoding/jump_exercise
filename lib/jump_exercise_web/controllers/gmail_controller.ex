@@ -1,6 +1,18 @@
 defmodule JumpExerciseWeb.GmailController do
   use JumpExerciseWeb, :controller
 
+  def send_email(conn, _params) do
+    case JumpExercise.Gmail.Client.send_email("demo@example.com", "Subject", "Body", actor: conn.assigns[:current_user]) do
+      {:ok, result} ->
+        json(conn, %{status: "sent", result: result})
+
+      {:error, reason} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{status: "error", reason: reason})
+    end
+  end
+
   def fetch_gmail_emails(conn, _params) do
     access_token = get_access_token_for_user(conn)
 

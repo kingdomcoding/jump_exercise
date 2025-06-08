@@ -46,6 +46,9 @@ defmodule JumpExerciseWeb.Router do
     get "/", PageController, :redirect_to_chat
     # redirect "/", "/chat"
     get "/gmail/emails", GmailController, :fetch_gmail_emails
+    get "/gmail/send_email", GmailController, :send_email
+
+
     get "/auth/user/google/callback", AuthController, :google_callback
     auth_routes AuthController, JumpExercise.Accounts.User, path: "/auth"
     sign_out_route AuthController

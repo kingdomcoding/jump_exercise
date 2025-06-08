@@ -5,7 +5,16 @@ defmodule JumpExercise.Gmail.Client do
 
   actions do
     action :send_email, :map do
+      argument :to, :string, allow_nil?: false
+      argument :subject, :string, allow_nil?: false
+      argument :body, :string, allow_nil?: false
 
+      run fn input, %{actor: user} ->
+        case JumpExercise.Gmail.GmailApi.send_email(user, input.arguments.to, input.arguments.subject, input.arguments.body) do
+          {:ok, result} -> {:ok, result}
+          {:error, reason} -> {:error, reason}
+        end
+      end
     end
 
     # action :list_emails, {:array, :map} do
@@ -31,4 +40,9 @@ defmodule JumpExercise.Gmail.Client do
 
     # end
   end
+
+  code_interface do
+    define :send_email, args: [:to, :subject, :body]
+  end
+
 end
