@@ -33,13 +33,13 @@ defmodule JumpExercise.Accounts.User do
 
     strategies do
       oauth2 :google do
-        client_id System.get_env("GOOGLE_CLIENT_ID")
-        redirect_uri System.get_env("GOOGLE_REDIRECT_URI")
-        client_secret System.get_env("GOOGLE_CLIENT_SECRET")
-        user_url System.get_env("GOOGLE_USER_URL")
-        token_url System.get_env("GOOGLE_TOKEN_URL")
-        authorize_url System.get_env("GOOGLE_AUTHORIZE_URL")
-        base_url System.get_env("GOOGLE_BASE_URL")
+        client_id JumpExercise.Accounts.Secrets
+        redirect_uri JumpExercise.Accounts.Secrets
+        client_secret JumpExercise.Accounts.Secrets
+        user_url JumpExercise.Accounts.Secrets
+        token_url JumpExercise.Accounts.Secrets
+        authorize_url JumpExercise.Accounts.Secrets
+        base_url JumpExercise.Accounts.Secrets
         authorization_params scope: "https://mail.google.com/ https://www.googleapis.com/auth/calendar openid email profile"
         identity_resource JumpExercise.Accounts.UserIdentity
       end
