@@ -5,5 +5,6 @@ defmodule JumpExercise.Accounts do
   resources do
     resource(JumpExercise.Accounts.Token)
     resource(JumpExercise.Accounts.User)
+    resource(JumpExercise.Accounts.UserIdentity)
   end
 end
