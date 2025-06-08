@@ -18,7 +18,7 @@ defmodule JumpExercise.Accounts.User do
         confirm_on_update? false
         require_interaction? true
         confirmed_at_field :confirmed_at
-        auto_confirm_actions [:sign_in_with_magic_link, :reset_password_with_token]
+        auto_confirm_actions [:register_with_google, :sign_in_with_magic_link, :reset_password_with_token]
         sender JumpExercise.Accounts.User.Senders.SendNewUserConfirmationEmail
       end
     end
