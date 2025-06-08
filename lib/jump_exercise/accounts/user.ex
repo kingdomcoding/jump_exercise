@@ -301,6 +301,10 @@ defmodule JumpExercise.Accounts.User do
     end
   end
 
+  relationships do
+    has_one :client, JumpExercise.Gmail.Client
+  end
+
   code_interface do
     define(:register_with_google, args: [:user_info, :oauth_tokens])
   end
