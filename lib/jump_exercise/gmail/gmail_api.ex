@@ -1,4 +1,4 @@
-defmodule JumpExercise.GmailApi do
+defmodule JumpExercise.Gmail.GmailApi do
   def list_emails(user, _params) do
     access_token = get_access_token_for_user(user)
 
@@ -35,6 +35,34 @@ defmodule JumpExercise.GmailApi do
       end)
 
     emails
+  end
+
+  def get_email(user, id) do
+    access_token = get_access_token_for_user(user)
+
+    headers = [
+      {"Authorization", "Bearer #{access_token}"},
+      {"Accept", "application/json"}
+    ]
+
+    {:ok, %HTTPoison.Response{body: msg_body, status_code: 200}} =
+      HTTPoison.get(
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages/#{id}?format=full",
+        headers
+      )
+
+    email = Jason.decode!(msg_body)
+
+    %{
+      thread_id: email["threadId"],
+      from: get_header(email, "From"),
+      to: get_header(email, "To"),
+      subject: get_header(email, "Subject"),
+      body: extract_body(email),
+      labels: email["labelIds"] || [],
+      snippet: email["snippet"] || "",
+      raw: Jason.encode!(email)
+    }
   end
 
   defp get_header(%{"payload" => %{"headers" => headers}}, name) do
