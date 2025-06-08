@@ -13,6 +13,18 @@ defmodule JumpExerciseWeb.GmailController do
     end
   end
 
+  def fetch_new_emails(conn, _params) do
+    case JumpExercise.Gmail.Client.fetch_new_emails(actor: conn.assigns[:current_user]) do
+      {:ok, emails} ->
+        json(conn, emails)
+
+      {:error, reason} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{status: "error", reason: reason})
+    end
+  end
+
   def fetch_gmail_emails(conn, _params) do
     access_token = get_access_token_for_user(conn)
 

@@ -39,7 +39,7 @@ defmodule JumpExercise.Gmail.GmailApi do
     end
   end
 
-  def fetch_new_emails(user, history_id) do
+  def fetch_new_emails(user) do
     access_token = get_access_token_for_user(user)
 
     headers = [
@@ -47,31 +47,43 @@ defmodule JumpExercise.Gmail.GmailApi do
       {"Accept", "application/json"}
     ]
 
-    params =
-      URI.encode_query(%{
-        "startHistoryId" => history_id,
-        "historyTypes" => "messageAdded"
-      })
+    # Fetch the latest historyId from the user's profile
+    profile_url = "https://gmail.googleapis.com/gmail/v1/users/me/profile"
+    case HTTPoison.get(profile_url, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: profile_body}} ->
+        %{"historyId" => history_id} = Jason.decode!(profile_body)
 
-    url = "#{@history_url}?#{params}"
+        params =
+          URI.encode_query(%{
+            "startHistoryId" => history_id,
+            "historyTypes" => "messageAdded"
+          })
 
-    case HTTPoison.get(url, headers) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        history = Jason.decode!(body)
+        url = "#{@history_url}?#{params}"
 
-        messages =
-          history["history"]
-          |> List.wrap()
-          |> Enum.flat_map(fn h -> h["messages"] || [] end)
-          |> Enum.uniq_by(& &1["id"])
+        case HTTPoison.get(url, headers) do
+          {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+            history = Jason.decode!(body)
 
-        # Fetch full message details for each new message
-        Enum.map(messages, fn %{"id" => id} ->
-          get_email(user, id)
-        end)
+            messages =
+              history["history"]
+              |> List.wrap()
+              |> Enum.flat_map(fn h -> h["messages"] || [] end)
+              |> Enum.uniq_by(& &1["id"])
 
-      {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
-        {:error, code, Jason.decode!(resp_body)}
+            {:ok, Enum.map(messages, fn %{"id" => id} ->
+              get_email(user, id)
+            end)}
+
+          {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
+            {:error, code, Jason.decode!(resp_body)}
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+
+      {:ok, %HTTPoison.Response{body: resp_body}} ->
+        {:error, Jason.decode!(resp_body)}
 
       {:error, reason} ->
         {:error, reason}

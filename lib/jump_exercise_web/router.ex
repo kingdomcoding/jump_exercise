@@ -47,6 +47,7 @@ defmodule JumpExerciseWeb.Router do
     # redirect "/", "/chat"
     get "/gmail/emails", GmailController, :fetch_gmail_emails
     get "/gmail/send_email", GmailController, :send_email
+    get "/gmail/fetch_new_emails", GmailController, :fetch_new_emails
 
 
     get "/auth/user/google/callback", AuthController, :google_callback
@@ -80,11 +81,6 @@ defmodule JumpExerciseWeb.Router do
       auth_routes_prefix: "/auth",
       overrides: [JumpExerciseWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
     )
-  end
-
-  scope "/api/gmail", JumpExerciseWeb do
-    post "/webhook", GmailWebhookController, :notify
-    get "/webhook", GmailWebhookController, :notify
   end
 
   # Other scopes may use custom stacks.
