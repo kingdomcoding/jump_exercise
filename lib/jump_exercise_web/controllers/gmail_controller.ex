@@ -23,14 +23,13 @@ defmodule JumpExerciseWeb.GmailController do
           )
 
         email = Jason.decode!(msg_body)
-        decoded_email = decode_email_parts(email)
 
         %{
           thread_id: email["threadId"],
-          from: get_header(decoded_email, "From"),
-          to: get_header(decoded_email, "To"),
-          subject: get_header(decoded_email, "Subject"),
-          body: extract_body(decoded_email),
+          from: get_header(email, "From"),
+          to: get_header(email, "To"),
+          subject: get_header(email, "Subject"),
+          body: extract_body(email),
           labels: email["labelIds"] || [],
           snippet: email["snippet"] || "",
           raw: Jason.encode!(email)
@@ -49,9 +48,8 @@ defmodule JumpExerciseWeb.GmailController do
     end
   end
 
-  defp extract_body(%{"payload" => payload}) do
-    extract_body_from_payload(payload)
-  end
+  defp extract_body(%{"payload" => payload}), do: extract_body_from_payload(payload)
+  defp extract_body(_), do: ""
 
   defp extract_body_from_payload(%{"mimeType" => "text/plain", "body" => %{"data" => data}})
        when is_binary(data) do
@@ -62,7 +60,6 @@ defmodule JumpExerciseWeb.GmailController do
   end
 
   defp extract_body_from_payload(%{"parts" => parts}) when is_list(parts) do
-    # Prefer text/plain, fallback to text/html
     plain =
       Enum.find(parts, fn part -> part["mimeType"] == "text/plain" end)
       |> case do
@@ -85,37 +82,6 @@ defmodule JumpExerciseWeb.GmailController do
   end
 
   defp extract_body_from_payload(_), do: ""
-
-  defp decode_email_parts(%{"payload" => payload} = email) do
-    Map.put(email, "payload", decode_payload(payload))
-  end
-
-  defp decode_email_parts(email), do: email
-
-  defp decode_payload(%{"parts" => parts} = payload) do
-    parts = Enum.map(parts, &decode_payload/1)
-
-    payload
-    |> decode_body_data()
-    |> Map.put("parts", parts)
-  end
-
-  defp decode_payload(payload) do
-    decode_body_data(payload)
-  end
-
-  defp decode_body_data(%{"body" => %{"data" => data} = body} = payload) do
-    decoded =
-      data
-      |> String.replace("-", "+")
-      |> String.replace("_", "/")
-      |> Base.decode64!(ignore: :whitespace)
-
-    body = Map.put(body, "data", decoded)
-    Map.put(payload, "body", body)
-  end
-
-  defp decode_body_data(payload), do: payload
 
   defp get_access_token_for_user(conn) do
     case conn.assigns[:current_user] do
