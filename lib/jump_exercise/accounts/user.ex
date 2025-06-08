@@ -44,17 +44,17 @@ defmodule JumpExercise.Accounts.User do
         identity_resource JumpExercise.Accounts.UserIdentity
       end
 
-      password :password do
-        identity_field :email
-        hash_provider AshAuthentication.BcryptProvider
+      # password :password do
+      #   identity_field :email
+      #   hash_provider AshAuthentication.BcryptProvider
 
-        resettable do
-          sender JumpExercise.Accounts.User.Senders.SendPasswordResetEmail
-          # these configurations will be the default in a future release
-          password_reset_action_name :reset_password_with_token
-          request_password_reset_action_name :request_password_reset_token
-        end
-      end
+      #   resettable do
+      #     sender JumpExercise.Accounts.User.Senders.SendPasswordResetEmail
+      #     # these configurations will be the default in a future release
+      #     password_reset_action_name :reset_password_with_token
+      #     request_password_reset_action_name :request_password_reset_token
+      #   end
+      # end
     end
   end
 
@@ -106,7 +106,7 @@ defmodule JumpExercise.Accounts.User do
         Ash.Changeset.change_attribute(changeset, :email, Map.get(user_info, "email"))
       end)
 
-      change(set_attribute(:confirmed_at, DateTime.utc_now()))
+      # change(set_attribute(:confirmed_at, DateTime.utc_now()))
 
       change(after_action(fn _changeset, user, _context -> {:ok, user} end))
     end
