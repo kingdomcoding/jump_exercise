@@ -21,7 +21,12 @@ config :spark, formatter: ["Ash.Resource": [section_order: [:authentication, :to
 config :jump_exercise,
   ecto_repos: [JumpExercise.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [JumpExercise.Twitter, JumpExercise.Chat, JumpExercise.Accounts]
+  ash_domains: [
+    JumpExercise.Gmail,
+    JumpExercise.Twitter,
+    JumpExercise.Chat,
+    JumpExercise.Accounts
+  ]
 
 # Configures the endpoint
 config :jump_exercise, JumpExerciseWeb.Endpoint,
