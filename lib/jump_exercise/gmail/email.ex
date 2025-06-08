@@ -6,7 +6,6 @@ defmodule JumpExercise.Gmail.Email do
 
   attributes do
     uuid_primary_key :id
-    attribute :gmail_id, :string, allow_nil?: false
     attribute :thread_id, :string
     attribute :from, :string
     attribute :to, :string
@@ -19,7 +18,7 @@ defmodule JumpExercise.Gmail.Email do
 
   actions do
     defaults [:read, :destroy]
-    default_accept [:gmail_id, :thread_id, :from, :to, :subject, :body, :labels, :snippet, :raw]
+    default_accept [:thread_id, :from, :to, :subject, :body, :labels, :snippet, :raw]
 
     create :send_email do
       change fn changeset, _ ->
