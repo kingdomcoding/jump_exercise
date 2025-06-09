@@ -3,7 +3,7 @@ defmodule JumpExercise.Gmail.Email do
     otp_app: :jump_exercise,
     domain: JumpExercise.Gmail,
     # TODO: Change this to postgres
-    data_layer: Ash.DataLayer.Ets
+    data_layer: AshPostgres.DataLayer
 
   attributes do
     uuid_primary_key(:id)
@@ -34,5 +34,10 @@ defmodule JumpExercise.Gmail.Email do
 
   code_interface do
     define :create
+  end
+
+  postgres do
+    table "gmail_emails"
+    repo JumpExercise.Repo
   end
 end

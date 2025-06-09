@@ -23,7 +23,6 @@ config :jump_exercise,
   generators: [timestamp_type: :utc_datetime],
   ash_domains: [
     JumpExercise.Gmail,
-    JumpExercise.Twitter,
     JumpExercise.Chat,
     JumpExercise.Accounts
   ]
