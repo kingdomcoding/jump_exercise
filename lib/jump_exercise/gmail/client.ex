@@ -39,8 +39,23 @@ defmodule JumpExercise.Gmail.Client do
     action :fetch_new_emails, :map do
       run fn _, %{actor: user} ->
         case JumpExercise.Gmail.GmailApi.fetch_new_emails(user) do
-          {:ok, emails} -> {:ok, emails}
-          {:error, reason} -> {:error, reason}
+          {:ok, emails} ->
+            :ok =
+              Enum.each(emails, fn email ->
+                JumpExercise.Gmail.Email.create!(%{
+                  thread_id: email.thread_id,
+                  from: email.from,
+                  to: email.to,
+                  subject: email.subject,
+                  body: email.body,
+                  labels: email.labels,
+                  snippet: email.snippet,
+                  raw: email.raw
+                })
+            end)
+            {:ok, emails}
+          {:error, reason} ->
+            {:error, reason}
         end
       end
     end
