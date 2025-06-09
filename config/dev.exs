@@ -2,6 +2,7 @@ import Config
 
 # Configure your database
 config :jump_exercise, JumpExercise.Repo,
+  types: JumpExercise.PostgrexTypes,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",

@@ -35,6 +35,7 @@ if config_env() == :prod do
 
   config :jump_exercise, JumpExercise.Repo,
     # ssl: true,
+    types: JumpExercise.PostgrexTypes,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6

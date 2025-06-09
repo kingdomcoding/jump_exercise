@@ -9,6 +9,7 @@ config :bcrypt_elixir, log_rounds: 1
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :jump_exercise, JumpExercise.Repo,
+  types: JumpExercise.PostgrexTypes,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
