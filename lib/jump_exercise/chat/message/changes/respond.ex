@@ -32,6 +32,8 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
       tools = [
         :send_email,
         # :fetch_emails,
+        :get_emails,
+        :get_email
       ]
 
       %{

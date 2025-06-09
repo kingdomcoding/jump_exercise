@@ -54,15 +54,19 @@ defmodule JumpExercise.Gmail.Email do
       end)
     end
 
+    read :get do
+      get_by :id
+    end
+
     read :semantic_search do
       argument :query, :string, allow_nil?: false
 
       prepare before_action(fn query, context ->
         case JumpExercise.OpenAiEmbeddingModel.generate([query.arguments.query], []) do
           {:ok, [search_vector]} ->
-            Ash.Query.filter(
-              query,
-              expr(vector_cosine_distance(full_text_vector, ^search_vector) < 0.5)
+            query
+            |> Ash.Query.filter(
+              expr(vector_cosine_distance(full_text_vector, ^search_vector) < 0.7)
             )
             |> Ash.Query.sort(
               {calc(vector_cosine_distance(full_text_vector, ^search_vector),
@@ -84,6 +88,8 @@ defmodule JumpExercise.Gmail.Email do
 
   code_interface do
     define :create
+    define :read
+    define :get, args: [:id]
     define :semantic_search, args: [:query]
   end
 

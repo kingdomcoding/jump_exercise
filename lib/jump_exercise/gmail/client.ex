@@ -14,8 +14,17 @@ defmodule JumpExercise.Gmail.Client do
   end
 
   actions do
-    defaults [:read, :destroy, create: :*]
+    defaults [:read, :destroy]
     default_accept [:last_fetched_history_id]
+
+    create :create do
+      primary? true
+      accept [:last_fetched_history_id]
+
+      change fn changeset, context ->
+        Ash.Changeset.manage_relationship(changeset, :user, context.actor, type: :append)
+      end
+    end
 
     update :update do
       primary? true
@@ -76,6 +85,7 @@ defmodule JumpExercise.Gmail.Client do
   end
 
   code_interface do
+    define :create
     define :update
     define :send_email, args: [:to, :subject, :body]
     define :fetch_emails

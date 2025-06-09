@@ -306,10 +306,17 @@ defmodule JumpExercise.Accounts.User do
   end
 
   changes do
-    change fn changeset, _ ->
-      user_id = Ash.Changeset.get_attribute(changeset, :id)
+    change after_action fn _changeset, user, _context ->
+      user
+      |> Ash.load!(:client)
+      |> case do
+        %{client: nil} ->
+          {:ok, _client} = JumpExercise.Gmail.Client.create(actor: user)
+          {:ok, user}
 
-      Ash.Changeset.manage_relationship(changeset, :client, %{user_id: user_id}, type: :create)
+        _ ->
+          {:ok, user}
+      end
     end
   end
 
