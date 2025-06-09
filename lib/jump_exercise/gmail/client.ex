@@ -36,32 +36,40 @@ defmodule JumpExercise.Gmail.Client do
       end
     end
 
-    action :update_email_records, {:array, :map} do
-      run fn _, %{actor: user} ->
-        result =
-          case Ash.load(user, :client) do
-            {:ok, %{client: %{last_fetched_history_id: nil}}} ->
-              JumpExercise.Gmail.GmailApi.fetch_historical_emails(user)
-            {:ok, %{client: %{last_fetched_history_id: _last_fetched_history_id}}} ->
-              JumpExercise.Gmail.GmailApi.fetch_new_emails(user)
-          end
+    action :fetch_emails, {:array, :map} do
+      description """
+      Fetches emails from the Gmail API for the given user and stores them in the database.
+      If this is the user's first fetch (no last_fetched_history_id), it retrieves historical emails.
+      Otherwise, it fetches only new emails since the last fetched history ID.
+      Each fetched email is persisted as a JumpExercise.Gmail.Email record.
+      Returns the list of fetched emails.
+      """
 
-        with {:ok, emails} <- result do
-          :ok =
-            Enum.each(emails, fn email ->
-              JumpExercise.Gmail.Email.create!(%{
-                thread_id: email.thread_id,
-                from: email.from,
-                to: email.to,
-                subject: email.subject,
-                body: email.body,
-                labels: email.labels,
-                snippet: email.snippet,
-                raw: email.raw
-              }, actor: user)
-            end)
-          {:ok, emails}
+      run fn _, %{actor: user} ->
+      result =
+        case Ash.load(user, :client) do
+        {:ok, %{client: %{last_fetched_history_id: nil}}} ->
+          JumpExercise.Gmail.GmailApi.fetch_historical_emails(user)
+        {:ok, %{client: %{last_fetched_history_id: _last_fetched_history_id}}} ->
+          JumpExercise.Gmail.GmailApi.fetch_new_emails(user)
         end
+
+      with {:ok, emails} <- result do
+        :ok =
+        Enum.each(emails, fn email ->
+          JumpExercise.Gmail.Email.create!(%{
+          thread_id: email.thread_id,
+          from: email.from,
+          to: email.to,
+          subject: email.subject,
+          body: email.body,
+          labels: email.labels,
+          snippet: email.snippet,
+          raw: email.raw
+          }, actor: user)
+        end)
+        {:ok, emails}
+      end
       end
     end
 
@@ -92,7 +100,7 @@ defmodule JumpExercise.Gmail.Client do
   code_interface do
     define :update
     define :send_email, args: [:to, :subject, :body]
-    define :update_email_records
+    define :fetch_emails
   end
 
 end

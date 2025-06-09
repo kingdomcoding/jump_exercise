@@ -13,8 +13,8 @@ defmodule JumpExerciseWeb.GmailController do
     end
   end
 
-  def update_email_records(conn, _params) do
-    case JumpExercise.Gmail.Client.update_email_records(actor: conn.assigns[:current_user]) do
+  def fetch_emails(conn, _params) do
+    case JumpExercise.Gmail.Client.fetch_emails(actor: conn.assigns[:current_user]) do
       {:ok, emails} ->
         json(conn, %{status: "updated", emails: emails})
 
