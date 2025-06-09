@@ -53,6 +53,7 @@ defmodule JumpExercise.Gmail.Client do
             JumpExercise.Gmail.GmailApi.fetch_new_emails(user)
           end
 
+        dbg(user)
         with {:ok, emails} <- result do
           :ok =
           Enum.each(emails, fn email ->
@@ -64,8 +65,9 @@ defmodule JumpExercise.Gmail.Client do
             body: email.body,
             labels: email.labels,
             snippet: email.snippet,
-            raw: email.raw
-            }, actor: user)
+            raw: email.raw,
+            user: user
+            })
           end)
           {:ok, emails}
         end

@@ -75,6 +75,10 @@ defmodule JumpExercise.Accounts.User do
     policy action(:register_with_google) do
       authorize_if(always())
     end
+
+    policy action(:read) do
+      authorize_if(always())
+    end
   end
 
   postgres do
@@ -311,6 +315,7 @@ defmodule JumpExercise.Accounts.User do
 
   relationships do
     has_one :client, JumpExercise.Gmail.Client, allow_nil?: false
+    has_many :emails, JumpExercise.Gmail.Email
   end
 
   code_interface do

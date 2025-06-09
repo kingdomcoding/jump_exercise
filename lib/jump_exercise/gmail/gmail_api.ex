@@ -81,7 +81,7 @@ defmodule JumpExercise.Gmail.GmailApi do
                   get_email(user, id)
                 end)
 
-              {:ok, _client} = JumpExercise.Gmail.Client.update(client, %{last_fetched_history_id: history_id})
+              {:ok, _client} = JumpExercise.Gmail.Client.update(client, %{last_fetched_history_id: history_id}, actor: user)
               {:ok, emails}
 
             {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
@@ -140,7 +140,7 @@ defmodule JumpExercise.Gmail.GmailApi do
     %{client: %{last_fetched_history_id: last_fetched_history_id} = client} = user = Ash.load!(user, :client)
     {:ok, %HTTPoison.Response{status_code: 200, body: profile_body}} = HTTPoison.get(profile_url, headers)
     %{"historyId" => history_id} = Jason.decode!(profile_body)
-    {:ok, _client} = JumpExercise.Gmail.Client.update(client, %{last_fetched_history_id: history_id})
+    {:ok, _client} = JumpExercise.Gmail.Client.update(client, %{last_fetched_history_id: history_id}, actor: user)
 
     {:ok, emails}
   end

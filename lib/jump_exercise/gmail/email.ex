@@ -39,15 +39,20 @@ defmodule JumpExercise.Gmail.Email do
     attribute(:raw, :string)
   end
 
-  changes do
-    change fn changeset, context ->
-      Ash.Changeset.manage_relationship(changeset, :user, context.actor, type: :append_and_remove)
-    end
-  end
-
   actions do
-    defaults([:create, :read, :update, :destroy])
+    defaults([:read, :update, :destroy])
     default_accept([:thread_id, :from, :to, :subject, :body, :labels, :snippet, :raw])
+
+    create :create do
+      argument :user, :map, allow_nil?: false
+      primary? true
+
+      change(fn changeset, context ->
+        user = Ash.Changeset.get_argument(changeset, :user)
+
+        Ash.Changeset.manage_relationship(changeset, :user, user, type: :append)
+      end)
+    end
 
     read :semantic_search do
       argument :query, :string, allow_nil?: false
