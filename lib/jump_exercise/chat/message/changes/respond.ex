@@ -30,15 +30,8 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
       new_message_id = Ash.UUID.generate()
 
       tools = [
-        :create_tweet,
-        :list_tweets,
-
         :send_email,
-        :fetch_emails,
-        # :list_emails,
-        # :get_email,
-        # :modify_labels,
-        # :delete_email
+        # :fetch_emails,
       ]
 
       %{
