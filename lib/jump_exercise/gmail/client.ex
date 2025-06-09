@@ -7,14 +7,24 @@ defmodule JumpExercise.Gmail.Client do
 
   attributes do
     uuid_primary_key :id
-    attribute :history_id, :string, allow_nil?: true
+    attribute :last_fetched_history_id, :string, allow_nil?: true
   end
 
   relationships do
-    belongs_to :user, JumpExercise.Accounts.User
+    belongs_to :user, JumpExercise.Accounts.User do
+
+    end
   end
 
   actions do
+    defaults [:read, :destroy, create: :*]
+    default_accept [:last_fetched_history_id]
+
+    update :update do
+      primary? true
+      accept [:last_fetched_history_id]
+    end
+
     action :send_email, :map do
       argument :to, :string, allow_nil?: false
       argument :subject, :string, allow_nil?: false
@@ -62,6 +72,7 @@ defmodule JumpExercise.Gmail.Client do
   end
 
   code_interface do
+    define :update
     define :send_email, args: [:to, :subject, :body]
     define :fetch_new_emails
   end

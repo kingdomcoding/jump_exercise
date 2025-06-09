@@ -47,40 +47,51 @@ defmodule JumpExercise.Gmail.GmailApi do
       {"Accept", "application/json"}
     ]
 
-    # Fetch the latest historyId from the user's profile
+    %{client: %{last_fetched_history_id: last_fetched_history_id} = client} = user = Ash.load!(user, :client)
+
     profile_url = "https://gmail.googleapis.com/gmail/v1/users/me/profile"
     case HTTPoison.get(profile_url, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: profile_body}} ->
         %{"historyId" => history_id} = Jason.decode!(profile_body)
 
-        params =
-          URI.encode_query(%{
-            "startHistoryId" => history_id,
-            "historyTypes" => "messageAdded"
-          })
+        if last_fetched_history_id == history_id do
+          # No new emails since last fetch
+          {:ok, []}
+        else
+          params =
+            URI.encode_query(%{
+              "startHistoryId" => last_fetched_history_id || history_id,
+              "historyTypes" => "messageAdded"
+            })
 
-        url = "#{@history_url}?#{params}"
+          url = "#{@history_url}?#{params}"
 
-        case HTTPoison.get(url, headers) do
-          {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-            history = Jason.decode!(body)
+          case HTTPoison.get(url, headers) do
+            {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+              history = Jason.decode!(body)
 
-            messages =
-              history["history"]
-              |> List.wrap()
-              |> Enum.flat_map(fn h -> h["messages"] || [] end)
-              |> Enum.uniq_by(& &1["id"])
+              messages =
+                history["history"]
+                |> List.wrap()
+                |> Enum.flat_map(fn h -> h["messages"] || [] end)
+                |> Enum.uniq_by(& &1["id"])
 
-            {:ok, Enum.map(messages, fn %{"id" => id} ->
-              get_email(user, id)
-            end)}
+              emails =
+                Enum.map(messages, fn %{"id" => id} ->
+                  get_email(user, id)
+                end)
 
-          {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
-            {:error, code, Jason.decode!(resp_body)}
+              {:ok, _client} = JumpExercise.Gmail.Client.update(client, %{last_fetched_history_id: history_id})
+              {:ok, emails}
 
-          {:error, reason} ->
-            {:error, reason}
+            {:ok, %HTTPoison.Response{status_code: code, body: resp_body}} ->
+              {:error, code, Jason.decode!(resp_body)}
+
+            {:error, reason} ->
+              {:error, reason}
+          end
         end
+
 
       {:ok, %HTTPoison.Response{body: resp_body}} ->
         {:error, Jason.decode!(resp_body)}
