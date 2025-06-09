@@ -5,25 +5,25 @@ defmodule JumpExercise.Gmail.Email do
     extensions: [AshAi],
     data_layer: AshPostgres.DataLayer
 
-  vectorize do
-    strategy :after_action
+  # vectorize do
+  #   strategy :after_action
 
-    full_text do
-      text fn record ->
-        """
-        Email details
-        From: #{record.from}
-        To: #{record.to}
-        Subject: #{record.subject}
-        Body: #{record.body}
-        """
-      end
+  #   full_text do
+  #     text fn record ->
+  #       """
+  #       Email details
+  #       From: #{record.from}
+  #       To: #{record.to}
+  #       Subject: #{record.subject}
+  #       Body: #{record.body}
+  #       """
+  #     end
 
-      used_attributes [:from, :to, :subject, :body]
-    end
+  #     used_attributes [:from, :to, :subject, :body]
+  #   end
 
-    embedding_model JumpExercise.OpenAiEmbeddingModel
-  end
+  #   embedding_model JumpExercise.OpenAiEmbeddingModel
+  # end
 
   attributes do
     uuid_primary_key(:id)
@@ -47,28 +47,28 @@ defmodule JumpExercise.Gmail.Email do
     defaults([:create, :read, :update, :destroy])
     default_accept([:thread_id, :from, :to, :subject, :body, :labels, :snippet, :raw])
 
-    read :search do
-      argument :query, :string, allow_nil?: false
+    # read :search do
+    #   argument :query, :string, allow_nil?: false
 
-      prepare before_action(fn query, context ->
-        case JumpExercise.OpenAiEmbeddingModel.generate([query.arguments.query], []) do
-          {:ok, [search_vector]} ->
-            Ash.Query.filter(
-              query,
-              vector_cosine_distance(full_text_vector, ^search_vector) < 0.5
-            )
-            |> Ash.Query.sort(
-              {calc(vector_cosine_distance(full_text_vector, ^search_vector),
-                type: :float
-              ), :asc}
-            )
-            |> Ash.Query.limit(10)
+    #   prepare before_action(fn query, context ->
+    #     case JumpExercise.OpenAiEmbeddingModel.generate([query.arguments.query], []) do
+    #       {:ok, [search_vector]} ->
+    #         Ash.Query.filter(
+    #           query,
+    #           vector_cosine_distance(full_text_vector, ^search_vector) < 0.5
+    #         )
+    #         |> Ash.Query.sort(
+    #           {calc(vector_cosine_distance(full_text_vector, ^search_vector),
+    #             type: :float
+    #           ), :asc}
+    #         )
+    #         |> Ash.Query.limit(10)
 
-          {:error, error} ->
-            {:error, error}
-        end
-      end)
-    end
+    #       {:error, error} ->
+    #         {:error, error}
+    #     end
+    #   end)
+    # end
   end
 
   relationships do
