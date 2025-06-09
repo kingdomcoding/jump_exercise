@@ -8,6 +8,7 @@ defmodule JumpExerciseWeb.AuthController do
          {:ok, user_info} <- GoogleOAuth2.fetch_user_info(tokens) do
       case JumpExercise.Accounts.User.register_with_google(user_info, tokens) do
         {:ok, user} ->
+          dbg(user)
           success(conn, {:google, :callback}, user, "demo_token")
 
         {:error, _reason} ->

@@ -5,6 +5,8 @@ defmodule JumpExercise.Gmail.Email do
     extensions: [AshAi],
     data_layer: AshPostgres.DataLayer
 
+  require Ash.Query
+
   vectorize do
     strategy :after_action
 
@@ -47,7 +49,7 @@ defmodule JumpExercise.Gmail.Email do
     defaults([:create, :read, :update, :destroy])
     default_accept([:thread_id, :from, :to, :subject, :body, :labels, :snippet, :raw])
 
-    read :search do
+    read :semantic_search do
       argument :query, :string, allow_nil?: false
 
       prepare before_action(fn query, context ->
@@ -77,6 +79,7 @@ defmodule JumpExercise.Gmail.Email do
 
   code_interface do
     define :create
+    define :semantic_search, args: [:query]
   end
 
   postgres do
