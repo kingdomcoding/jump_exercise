@@ -308,9 +308,9 @@ defmodule JumpExercise.Accounts.User do
       Ash.Changeset.manage_relationship(changeset, :client, %{user_id: user_id}, type: :create)
     end
   end
-  
+
   relationships do
-    has_one :client, JumpExercise.Gmail.Client
+    has_one :client, JumpExercise.Gmail.Client, allow_nil?: false
   end
 
   code_interface do

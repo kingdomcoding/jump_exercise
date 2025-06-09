@@ -11,9 +11,7 @@ defmodule JumpExercise.Gmail.Client do
   end
 
   relationships do
-    belongs_to :user, JumpExercise.Accounts.User do
-
-    end
+    belongs_to :user, JumpExercise.Accounts.User, allow_nil?: false
   end
 
   actions do

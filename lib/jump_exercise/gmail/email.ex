@@ -20,33 +20,13 @@ defmodule JumpExercise.Gmail.Email do
   actions do
     defaults([:create, :read, :update, :destroy])
     default_accept([:thread_id, :from, :to, :subject, :body, :labels, :snippet, :raw])
+  end
 
-    # create :send_email do
-    #   change(fn changeset, _ ->
-    #     # TODO: Implement Gmail API call to send email
-    #     changeset
-    #   end)
-    # end
+  relationships do
+    belongs_to :user, JumpExercise.Accounts.User, allow_nil?: false
+  end
 
-    # read :list_emails do
-    #   prepare(fn query, context ->
-    #     # actor = Map.get(context, :actor)
-    #     # |> dbg()
-
-
-    #     query
-    #   end)
-    # end
-
-    # read :get_email do
-    #   prepare(fn query, _ ->
-    #     # TODO: Implement Gmail API call to get a single email
-    #     query
-    #   end)
-    # end
-
-    # update(:modify_labels)
-
-    # destroy(:delete_email)
+  code_interface do
+    define :create
   end
 end
