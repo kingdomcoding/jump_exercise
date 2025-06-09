@@ -13,54 +13,16 @@ defmodule JumpExerciseWeb.GmailController do
     end
   end
 
-  def fetch_new_emails(conn, _params) do
-    case JumpExercise.Gmail.Client.fetch_new_emails(actor: conn.assigns[:current_user]) do
+  def update_email_records(conn, _params) do
+    case JumpExercise.Gmail.Client.update_email_records(actor: conn.assigns[:current_user]) do
       {:ok, emails} ->
-        json(conn, emails)
+        json(conn, %{status: "updated", emails: emails})
 
       {:error, reason} ->
         conn
         |> put_status(:bad_request)
         |> json(%{status: "error", reason: reason})
     end
-  end
-
-  def fetch_gmail_emails(conn, _params) do
-    access_token = get_access_token_for_user(conn)
-
-    headers = [
-      {"Authorization", "Bearer #{access_token}"},
-      {"Accept", "application/json"}
-    ]
-
-    {:ok, %HTTPoison.Response{body: body, status_code: 200}} =
-      HTTPoison.get("https://gmail.googleapis.com/gmail/v1/users/me/messages", headers)
-
-    messages = Jason.decode!(body)["messages"] || []
-
-    emails =
-      Enum.map(messages |> Enum.take(1), fn %{"id" => id} ->
-        {:ok, %HTTPoison.Response{body: msg_body, status_code: 200}} =
-          HTTPoison.get(
-            "https://gmail.googleapis.com/gmail/v1/users/me/messages/#{id}?format=full",
-            headers
-          )
-
-        email = Jason.decode!(msg_body)
-
-        %{
-          thread_id: email["threadId"],
-          from: get_header(email, "From"),
-          to: get_header(email, "To"),
-          subject: get_header(email, "Subject"),
-          body: extract_body(email),
-          labels: email["labelIds"] || [],
-          snippet: email["snippet"] || "",
-          raw: Jason.encode!(email)
-        }
-      end)
-
-    json(conn, emails)
   end
 
   defp get_header(%{"payload" => %{"headers" => headers}}, name) do

@@ -36,26 +36,31 @@ defmodule JumpExercise.Gmail.Client do
       end
     end
 
-    action :fetch_new_emails, :map do
+    action :update_email_records, {:array, :map} do
       run fn _, %{actor: user} ->
-        case JumpExercise.Gmail.GmailApi.fetch_new_emails(user) do
-          {:ok, emails} ->
-            :ok =
-              Enum.each(emails, fn email ->
-                JumpExercise.Gmail.Email.create!(%{
-                  thread_id: email.thread_id,
-                  from: email.from,
-                  to: email.to,
-                  subject: email.subject,
-                  body: email.body,
-                  labels: email.labels,
-                  snippet: email.snippet,
-                  raw: email.raw
-                })
+        result =
+          case Ash.load(user, :client) do
+            {:ok, %{client: %{last_fetched_history_id: nil}}} ->
+              JumpExercise.Gmail.GmailApi.fetch_historical_emails(user)
+            {:ok, %{client: %{last_fetched_history_id: _last_fetched_history_id}}} ->
+              JumpExercise.Gmail.GmailApi.fetch_new_emails(user)
+          end
+
+        with {:ok, emails} <- result do
+          :ok =
+            Enum.each(emails, fn email ->
+              JumpExercise.Gmail.Email.create!(%{
+                thread_id: email.thread_id,
+                from: email.from,
+                to: email.to,
+                subject: email.subject,
+                body: email.body,
+                labels: email.labels,
+                snippet: email.snippet,
+                raw: email.raw
+              }, actor: user)
             end)
-            {:ok, emails}
-          {:error, reason} ->
-            {:error, reason}
+          {:ok, emails}
         end
       end
     end
@@ -87,7 +92,7 @@ defmodule JumpExercise.Gmail.Client do
   code_interface do
     define :update
     define :send_email, args: [:to, :subject, :body]
-    define :fetch_new_emails
+    define :update_email_records
   end
 
 end

@@ -101,7 +101,7 @@ defmodule JumpExercise.Gmail.GmailApi do
     end
   end
 
-  def list_emails(user, _params) do
+  def fetch_historical_emails(user) do
     access_token = get_access_token_for_user(user)
 
     headers = [
@@ -136,7 +136,13 @@ defmodule JumpExercise.Gmail.GmailApi do
         }
       end)
 
-    emails
+    profile_url = "https://gmail.googleapis.com/gmail/v1/users/me/profile"
+    %{client: %{last_fetched_history_id: last_fetched_history_id} = client} = user = Ash.load!(user, :client)
+    {:ok, %HTTPoison.Response{status_code: 200, body: profile_body}} = HTTPoison.get(profile_url, headers)
+    %{"historyId" => history_id} = Jason.decode!(profile_body)
+    {:ok, _client} = JumpExercise.Gmail.Client.update(client, %{last_fetched_history_id: history_id})
+
+    {:ok, emails}
   end
 
   def get_email(user, id) do

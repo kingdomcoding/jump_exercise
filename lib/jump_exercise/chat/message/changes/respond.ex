@@ -34,6 +34,7 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
         :list_tweets,
 
         :send_email,
+        :update_email_records,
         # :list_emails,
         # :get_email,
         # :modify_labels,
