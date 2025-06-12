@@ -53,6 +53,11 @@ defmodule JumpExercise.Accounts.User do
         identity_resource JumpExercise.Accounts.UserIdentity
       end
 
+      api_key :api_key do
+        api_key_relationship :valid_api_keys
+        api_key_hash_attribute :api_key_hash
+      end
+
       # password :password do
       #   identity_field :email
       #   hash_provider AshAuthentication.BcryptProvider
@@ -100,6 +105,15 @@ defmodule JumpExercise.Accounts.User do
     end
 
     attribute(:confirmed_at, :utc_datetime_usec)
+  end
+
+  relationships do
+    has_one :client, JumpExercise.Gmail.Client, allow_nil?: false
+    has_many :emails, JumpExercise.Gmail.Email
+
+    has_many :valid_api_keys, JumpExercise.Accounts.ApiKey do
+      filter(expr(valid))
+    end
   end
 
   actions do
@@ -292,6 +306,11 @@ defmodule JumpExercise.Accounts.User do
       # Generates an authentication token for the user
       change(AshAuthentication.GenerateTokenChange)
     end
+
+    read :sign_in_with_api_key do
+      argument(:api_key, :string, allow_nil?: false)
+      prepare(AshAuthentication.Strategy.ApiKey.SignInPreparation)
+    end
   end
 
   actions do
@@ -305,31 +324,28 @@ defmodule JumpExercise.Accounts.User do
     end
   end
 
-  changes do
-    change after_action fn _changeset, user, _context ->
-      user
-      |> Ash.load!(:client)
-      |> case do
-        %{client: nil} ->
-          {:ok, _client} = JumpExercise.Gmail.Client.create(actor: user)
-          {:ok, user}
-
-        _ ->
-          {:ok, user}
-      end
-    end
-  end
-
-  relationships do
-    has_one :client, JumpExercise.Gmail.Client, allow_nil?: false
-    has_many :emails, JumpExercise.Gmail.Email
-  end
-
   code_interface do
     define(:register_with_google, args: [:user_info, :oauth_tokens])
   end
 
   identities do
     identity(:unique_email, [:email])
+  end
+
+  changes do
+    change(
+      after_action(fn _changeset, user, _context ->
+        user
+        |> Ash.load!(:client)
+        |> case do
+          %{client: nil} ->
+            {:ok, _client} = JumpExercise.Gmail.Client.create(actor: user)
+            {:ok, user}
+
+          _ ->
+            {:ok, user}
+        end
+      end)
+    )
   end
 end
