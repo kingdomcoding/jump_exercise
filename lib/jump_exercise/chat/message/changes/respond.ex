@@ -27,7 +27,7 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
 
       message_chain = message_chain(messages)
 
-      new_message_id = Ash.UUID.generate()
+      new_message_id = Ash.UUIDv7.generate()
 
       tools = [
         :send_email,
@@ -51,26 +51,28 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
       # i.e tools: [:lookup_weather]
       |> AshAi.setup_ash_ai(otp_app: :jump_exercise, tools: tools, actor: context.actor)
       |> LLMChain.add_callback(%{
-        on_llm_new_delta: fn _model, data ->
-          if data.content && data.content != "" do
-            JumpExercise.Chat.Message
-            |> Ash.Changeset.for_create(
-              :upsert_response,
-              %{
+        on_llm_new_delta: fn  _chain, deltas ->
+          deltas
+          |> List.wrap()
+          |> Enum.each(fn delta ->
+            content = LangChain.MessageDelta.content_to_string(delta)
+
+            if not is_nil(content) and content != "" do
+              JumpExercise.Chat.Message
+              |> Ash.Changeset.for_create(:upsert_response, %{
                 id: new_message_id,
                 response_to_id: message.id,
                 conversation_id: message.conversation_id,
-                text: data.content
-              },
-              actor: %AshAi{}
-            )
-            |> Ash.create!()
-          end
+                text: content
+              }, actor: %AshAi{})
+              |> Ash.create!()
+            end
+          end)
         end,
         on_message_processed: fn _chain, data ->
           if (data.tool_calls && Enum.any?(data.tool_calls)) ||
                (data.tool_results && Enum.any?(data.tool_results)) ||
-               data.content not in [nil, ""] do
+               LangChain.Message.ContentPart.content_to_string(data.content) not in [nil, ""] do
             JumpExercise.Chat.Message
             |> Ash.Changeset.for_create(
               :upsert_response,
@@ -89,17 +91,24 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
                   data.tool_results &&
                     Enum.map(
                       data.tool_results,
-                      &Map.take(&1, [
-                        :type,
-                        :tool_call_id,
-                        :name,
+                      &Map.update(
+                        Map.take(&1, [
+                          :type,
+                          :tool_call_id,
+                          :name,
+                          :content,
+                          :display_text,
+                          :is_error,
+                          :options
+                        ]),
                         :content,
-                        :display_text,
-                        :is_error,
-                        :options
-                      ])
+                        nil,
+                        fn content ->
+                          LangChain.Message.ContentPart.content_to_string(content)
+                        end
+                      )
                     ),
-                text: data.content || ""
+                text: LangChain.Message.ContentPart.content_to_string(data.content) || ""
               },
               actor: %AshAi{}
             )
@@ -108,6 +117,8 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
         end
       })
       |> LLMChain.run(mode: :while_needs_response)
+
+
 
       changeset
     end)
