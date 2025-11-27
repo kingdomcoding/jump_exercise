@@ -20,7 +20,7 @@ config :langchain, openai_key: fn -> System.fetch_env!("OPENAI_API_KEY") end
 if System.get_env("PHX_SERVER") do
   config :jump_exercise, JumpExerciseWeb.Endpoint,
     server: true,
-    check_origin: ["https://jump-exercise.onrender.com"]
+    check_origin: ["https://jump-prototype.onrender.com"]
 end
 
 if config_env() == :prod do
