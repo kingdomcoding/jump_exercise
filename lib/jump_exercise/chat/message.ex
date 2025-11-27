@@ -85,7 +85,13 @@ defmodule JumpExercise.Chat.Message do
   end
 
   actions do
-    defaults([:read, :destroy])
+    defaults([:destroy])
+
+    read :read do
+      primary? true
+
+      pagination(keyset?: true, required?: false)
+    end
 
     read :for_conversation do
       pagination(keyset?: true, required?: false)

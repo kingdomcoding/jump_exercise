@@ -59,7 +59,13 @@ defmodule JumpExercise.Chat.Conversation do
   end
 
   actions do
-    defaults([:read, :destroy])
+    defaults([:destroy])
+
+    read :read do
+      primary? true
+
+      pagination(keyset?: true, required?: false)
+    end
 
     create :create do
       accept([:title])
