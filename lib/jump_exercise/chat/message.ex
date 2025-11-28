@@ -3,8 +3,8 @@ defmodule JumpExercise.Chat.Message do
     otp_app: :jump_exercise,
     domain: JumpExercise.Chat,
     # extensions: [AshOban],
-    data_layer: AshPostgres.DataLayer,
-    notifiers: [Ash.Notifier.PubSub]
+    data_layer: AshPostgres.DataLayer
+    # notifiers: [Ash.Notifier.PubSub]
 
   # oban do
   #   triggers do
@@ -26,22 +26,22 @@ defmodule JumpExercise.Chat.Message do
     repo JumpExercise.Repo
   end
 
-  pub_sub do
-    module(JumpExerciseWeb.Endpoint)
-    prefix "chat"
+  # pub_sub do
+  #   module(JumpExerciseWeb.Endpoint)
+  #   prefix "chat"
 
-    publish :create, ["messages", :conversation_id] do
-      transform(fn %{data: message} ->
-        %{text: message.text, id: message.id, source: message.source}
-      end)
-    end
+  #   publish :create, ["messages", :conversation_id] do
+  #     transform(fn %{data: message} ->
+  #       %{text: message.text, id: message.id, source: message.source}
+  #     end)
+  #   end
 
-    publish :upsert_response, ["messages", :conversation_id] do
-      transform(fn %{data: message} ->
-        %{text: message.text, id: message.id, source: message.source}
-      end)
-    end
-  end
+  #   publish :upsert_response, ["messages", :conversation_id] do
+  #     transform(fn %{data: message} ->
+  #       %{text: message.text, id: message.id, source: message.source}
+  #     end)
+  #   end
+  # end
 
   attributes do
     timestamps()

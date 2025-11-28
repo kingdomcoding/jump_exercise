@@ -3,8 +3,8 @@ defmodule JumpExercise.Chat.Conversation do
     otp_app: :jump_exercise,
     domain: JumpExercise.Chat,
     # extensions: [AshOban],
-    data_layer: AshPostgres.DataLayer,
-    notifiers: [Ash.Notifier.PubSub]
+    data_layer: AshPostgres.DataLayer
+    # notifiers: [Ash.Notifier.PubSub]
 
   # oban do
   #   triggers do
@@ -24,18 +24,18 @@ defmodule JumpExercise.Chat.Conversation do
     repo JumpExercise.Repo
   end
 
-  pub_sub do
-    module(JumpExerciseWeb.Endpoint)
-    prefix "chat"
+  # pub_sub do
+  #   module(JumpExerciseWeb.Endpoint)
+  #   prefix "chat"
 
-    publish_all :create, ["conversations", :user_id] do
-      transform(& &1.data)
-    end
+  #   publish_all :create, ["conversations", :user_id] do
+  #     transform(& &1.data)
+  #   end
 
-    publish_all :update, ["conversations", :user_id] do
-      transform(& &1.data)
-    end
-  end
+  #   publish_all :update, ["conversations", :user_id] do
+  #     transform(& &1.data)
+  #   end
+  # end
 
   attributes do
     uuid_v7_primary_key(:id)
