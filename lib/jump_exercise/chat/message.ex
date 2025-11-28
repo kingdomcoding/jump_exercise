@@ -115,12 +115,12 @@ defmodule JumpExercise.Chat.Message do
     #   # change(run_oban_trigger(:respond))
     # end
 
-    # update :respond do
-    #   accept([])
-    #   require_atomic?(false)
-    #   transaction?(false)
-    #   change(JumpExercise.Chat.Message.Changes.Respond)
-    # end
+    update :respond do
+      accept([])
+      require_atomic?(false)
+      transaction?(false)
+      change(JumpExercise.Chat.Message.Changes.Respond)
+    end
 
     create :upsert_response do
       upsert?(true)
