@@ -9,11 +9,11 @@ defmodule JumpExercise.Chat.Conversation do
   oban do
     triggers do
       trigger :name_conversation do
-        action :generate_name
-        queue :conversations
-        lock_for_update? false
-        worker_module_name JumpExercise.Chat.Message.Workers.NameConversation
-        scheduler_module_name JumpExercise.Chat.Message.Schedulers.NameConversation
+        action(:generate_name)
+        queue(:conversations)
+        lock_for_update?(false)
+        worker_module_name(JumpExercise.Chat.Message.Workers.NameConversation)
+        scheduler_module_name(JumpExercise.Chat.Message.Schedulers.NameConversation)
         where expr(needs_title)
       end
     end
@@ -63,7 +63,6 @@ defmodule JumpExercise.Chat.Conversation do
 
     read :read do
       primary? true
-
       pagination(keyset?: true, required?: false)
     end
 

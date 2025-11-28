@@ -2,13 +2,13 @@ defmodule JumpExercise.Chat do
   use Ash.Domain, otp_app: :jump_exercise, extensions: [AshPhoenix]
 
   resources do
-    resource(JumpExercise.Chat.Conversation) do
+    resource JumpExercise.Chat.Conversation do
       define(:create_conversation, action: :create)
       define(:get_conversation, action: :read, get_by: [:id])
       define(:my_conversations)
     end
 
-    resource(JumpExercise.Chat.Message) do
+    resource JumpExercise.Chat.Message do
       define(:message_history,
         action: :for_conversation,
         args: [:conversation_id],

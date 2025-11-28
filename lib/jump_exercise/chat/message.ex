@@ -9,13 +9,13 @@ defmodule JumpExercise.Chat.Message do
   oban do
     triggers do
       trigger :respond do
-        actor_persister JumpExercise.AiAgentActorPersister
-        action :respond
-        queue :chat_responses
-        lock_for_update? false
-        scheduler_cron false
-        worker_module_name JumpExercise.Chat.Message.Workers.Respond
-        scheduler_module_name JumpExercise.Chat.Message.Schedulers.Respond
+        actor_persister(JumpExercise.AiAgentActorPersister)
+        action(:respond)
+        queue(:chat_responses)
+        lock_for_update?(false)
+        scheduler_cron(false)
+        worker_module_name(JumpExercise.Chat.Message.Workers.Respond)
+        scheduler_module_name(JumpExercise.Chat.Message.Schedulers.Respond)
         where expr(needs_response)
       end
     end
@@ -89,7 +89,6 @@ defmodule JumpExercise.Chat.Message do
 
     read :read do
       primary? true
-
       pagination(keyset?: true, required?: false)
     end
 
@@ -103,6 +102,10 @@ defmodule JumpExercise.Chat.Message do
 
     create :create do
       accept([:text])
+
+      validate match(:text, ~r/\S/) do
+        message "Message cannot be empty"
+      end
 
       argument :conversation_id, :uuid do
         public?(false)

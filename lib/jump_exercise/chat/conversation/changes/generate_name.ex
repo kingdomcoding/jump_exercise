@@ -15,13 +15,13 @@ defmodule JumpExercise.Chat.Conversation.Changes.GenerateName do
         |> Ash.Query.filter(conversation_id == ^conversation.id)
         |> Ash.Query.limit(10)
         |> Ash.Query.select([:text, :source])
-        |> Ash.Query.sort(inserted_at: :desc)
+        |> Ash.Query.sort(inserted_at: :asc)
         |> Ash.read!()
 
       system_prompt =
         LangChain.Message.new_system!("""
         Provide a short name for the current conversation.
-        2-8 words, preferring more succint names.
+        2-8 words, preferring more succinct names.
         RESPOND WITH ONLY THE NEW CONVERSATION NAME.
         """)
 
@@ -35,11 +35,8 @@ defmodule JumpExercise.Chat.Conversation.Changes.GenerateName do
         end)
 
       %{
-        llm:
-          ChatOpenAI.new!(%{
-            model: "gpt-4.1-nano",
-            custom_context: Map.new(Ash.Context.to_opts(context))
-          }),
+        llm: ChatOpenAI.new!(%{model: "gpt-4o"}),
+        custom_context: Map.new(Ash.Context.to_opts(context)),
         verbose?: true
       }
       |> LLMChain.new!()
@@ -51,7 +48,11 @@ defmodule JumpExercise.Chat.Conversation.Changes.GenerateName do
          %LangChain.Chains.LLMChain{
            last_message: %{content: content}
          }} ->
-          Ash.Changeset.force_change_attribute(changeset, :title, content)
+          Ash.Changeset.force_change_attribute(
+            changeset,
+            :title,
+            LangChain.Message.ContentPart.content_to_string(content)
+          )
 
         {:error, _, error} ->
           {:error, error}

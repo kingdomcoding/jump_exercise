@@ -15,7 +15,7 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
         |> Ash.Query.filter(conversation_id == ^message.conversation_id)
         |> Ash.Query.filter(id != ^message.id)
         |> Ash.Query.select([:text, :source, :tool_calls, :tool_results])
-        |> Ash.Query.sort(inserted_at: :desc)
+        |> Ash.Query.sort(inserted_at: :asc)
         |> Ash.read!()
         |> Enum.concat([%{source: :user, text: message.text}])
 
@@ -32,17 +32,13 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
       tools = [
         :send_email,
         # :fetch_emails,
-        :get_emails,
-        :get_email
+        # :get_emails,
+        # :get_email
       ]
 
       %{
-        llm:
-          ChatOpenAI.new!(%{
-            model: "gpt-4.1-nano",
-            stream: true,
-            custom_context: Map.new(Ash.Context.to_opts(context))
-          })
+        llm: ChatOpenAI.new!(%{model: "gpt-4o", stream: true}),
+        custom_context: Map.new(Ash.Context.to_opts(context))
       }
       |> LLMChain.new!()
       |> LLMChain.add_message(system_prompt)
@@ -51,7 +47,7 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
       # i.e tools: [:lookup_weather]
       |> AshAi.setup_ash_ai(otp_app: :jump_exercise, tools: tools, actor: context.actor)
       |> LLMChain.add_callback(%{
-        on_llm_new_delta: fn  _chain, deltas ->
+        on_llm_new_delta: fn _chain, deltas ->
           deltas
           |> List.wrap()
           |> Enum.each(fn delta ->
@@ -59,12 +55,16 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
 
             if not is_nil(content) and content != "" do
               JumpExercise.Chat.Message
-              |> Ash.Changeset.for_create(:upsert_response, %{
-                id: new_message_id,
-                response_to_id: message.id,
-                conversation_id: message.conversation_id,
-                text: content
-              }, actor: %AshAi{})
+              |> Ash.Changeset.for_create(
+                :upsert_response,
+                %{
+                  id: new_message_id,
+                  response_to_id: message.id,
+                  conversation_id: message.conversation_id,
+                  text: content
+                },
+                actor: %AshAi{}
+              )
               |> Ash.create!()
             end
           end)
@@ -117,8 +117,6 @@ defmodule JumpExercise.Chat.Message.Changes.Respond do
         end
       })
       |> LLMChain.run(mode: :while_needs_response)
-
-
 
       changeset
     end)

@@ -10,18 +10,17 @@ defmodule JumpExercise.Application do
     children = [
       JumpExerciseWeb.Telemetry,
       JumpExercise.Repo,
-      {DNSCluster, query: Application.get_env(:jump_exercise, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:jump_exercise, :dns_cluster_query) || :ignore},
       {Oban,
        AshOban.config(
          Application.fetch_env!(:jump_exercise, :ash_domains),
          Application.fetch_env!(:jump_exercise, Oban)
        )},
-      # Start the Finch HTTP client for sending emails
+      {Phoenix.PubSub, name: JumpExercise.PubSub},
       # Start a worker by calling: JumpExercise.Worker.start_link(arg)
       # {JumpExercise.Worker, arg},
       # Start to serve requests, typically the last entry
-      {Phoenix.PubSub, name: JumpExercise.PubSub},
-      {Finch, name: JumpExercise.Finch},
       JumpExerciseWeb.Endpoint,
       {AshAuthentication.Supervisor, [otp_app: :jump_exercise]}
     ]
