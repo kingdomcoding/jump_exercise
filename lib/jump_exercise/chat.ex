@@ -8,14 +8,14 @@ defmodule JumpExercise.Chat do
       define(:my_conversations)
     end
 
-  #   resource JumpExercise.Chat.Message do
-  #     define(:message_history,
-  #       action: :for_conversation,
-  #       args: [:conversation_id],
-  #       default_options: [query: [sort: [inserted_at: :desc]]]
-  #     )
+    resource JumpExercise.Chat.Message do
+      # define(:message_history,
+      #   action: :for_conversation,
+      #   args: [:conversation_id],
+      #   default_options: [query: [sort: [inserted_at: :desc]]]
+      # )
 
-  #     define(:create_message, action: :create)
-  #   end
+      # define(:create_message, action: :create)
+    end
   end
 end
