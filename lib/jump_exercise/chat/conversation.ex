@@ -2,22 +2,22 @@ defmodule JumpExercise.Chat.Conversation do
   use Ash.Resource,
     otp_app: :jump_exercise,
     domain: JumpExercise.Chat,
-    extensions: [AshOban],
+    # extensions: [AshOban],
     data_layer: AshPostgres.DataLayer,
     notifiers: [Ash.Notifier.PubSub]
 
-  oban do
-    triggers do
-      trigger :name_conversation do
-        action(:generate_name)
-        queue(:conversations)
-        lock_for_update?(false)
-        worker_module_name(JumpExercise.Chat.Message.Workers.NameConversation)
-        scheduler_module_name(JumpExercise.Chat.Message.Schedulers.NameConversation)
-        where expr(needs_title)
-      end
-    end
-  end
+  # oban do
+  #   triggers do
+  #     trigger :name_conversation do
+  #       action(:generate_name)
+  #       queue(:conversations)
+  #       lock_for_update?(false)
+  #       worker_module_name(JumpExercise.Chat.Message.Workers.NameConversation)
+  #       scheduler_module_name(JumpExercise.Chat.Message.Schedulers.NameConversation)
+  #       where expr(needs_title)
+  #     end
+  #   end
+  # end
 
   postgres do
     table "conversations"
