@@ -39,13 +39,13 @@ defmodule JumpExercise.Accounts.User do
 
     strategies do
       oauth2 :google do
-        client_id JumpExercise.Accounts.Secrets
-        redirect_uri JumpExercise.Accounts.Secrets
-        client_secret JumpExercise.Accounts.Secrets
-        user_url JumpExercise.Accounts.Secrets
-        token_url JumpExercise.Accounts.Secrets
-        authorize_url JumpExercise.Accounts.Secrets
-        base_url JumpExercise.Accounts.Secrets
+        client_id JumpExercise.Secrets
+        redirect_uri JumpExercise.Secrets
+        client_secret JumpExercise.Secrets
+        user_url JumpExercise.Secrets
+        token_url JumpExercise.Secrets
+        authorize_url JumpExercise.Secrets
+        base_url JumpExercise.Secrets
 
         authorization_params scope:
                                "https://mail.google.com/ https://www.googleapis.com/auth/calendar openid email profile"
