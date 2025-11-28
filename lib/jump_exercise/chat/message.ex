@@ -44,46 +44,46 @@ defmodule JumpExercise.Chat.Message do
   #   end
   # end
 
-  # attributes do
-  #   timestamps()
-  #   uuid_v7_primary_key(:id, writable?: true)
+  attributes do
+    timestamps()
+    uuid_v7_primary_key(:id, writable?: true)
 
-  #   attribute :text, :string do
-  #     constraints(allow_empty?: true, trim?: false)
-  #     public?(true)
-  #     allow_nil?(false)
-  #   end
+    attribute :text, :string do
+      constraints(allow_empty?: true, trim?: false)
+      public?(true)
+      allow_nil?(false)
+    end
 
-  #   attribute(:tool_calls, {:array, :map})
-  #   attribute(:tool_results, {:array, :map})
+    attribute(:tool_calls, {:array, :map})
+    attribute(:tool_results, {:array, :map})
 
-  #   attribute :source, JumpExercise.Chat.Message.Types.Source do
-  #     allow_nil?(false)
-  #     public?(true)
-  #     default(:user)
-  #   end
+    attribute :source, JumpExercise.Chat.Message.Types.Source do
+      allow_nil?(false)
+      public?(true)
+      default(:user)
+    end
 
-  #   attribute :complete, :boolean do
-  #     allow_nil?(false)
-  #     default(true)
-  #   end
-  # end
+    attribute :complete, :boolean do
+      allow_nil?(false)
+      default(true)
+    end
+  end
 
-  # relationships do
-  #   belongs_to :conversation, JumpExercise.Chat.Conversation do
-  #     public?(true)
-  #     allow_nil?(false)
-  #   end
+  relationships do
+    belongs_to :conversation, JumpExercise.Chat.Conversation do
+      public?(true)
+      allow_nil?(false)
+    end
 
-  #   belongs_to :response_to, __MODULE__ do
-  #     public?(true)
-  #   end
+    belongs_to :response_to, __MODULE__ do
+      public?(true)
+    end
 
-  #   has_one :response, __MODULE__ do
-  #     public?(true)
-  #     destination_attribute(:response_to_id)
-  #   end
-  # end
+    has_one :response, __MODULE__ do
+      public?(true)
+      destination_attribute(:response_to_id)
+    end
+  end
 
   # actions do
   #   defaults([:destroy])
@@ -202,9 +202,9 @@ defmodule JumpExercise.Chat.Message do
   #   end
   # end
 
-  # calculations do
-  #   calculate :needs_response, :boolean do
-  #     calculation(expr(source == :user and not exists(response)))
-  #   end
-  # end
+  calculations do
+    calculate :needs_response, :boolean do
+      calculation(expr(source == :user and not exists(response)))
+    end
+  end
 end
