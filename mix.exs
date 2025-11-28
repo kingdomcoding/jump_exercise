@@ -5,12 +5,13 @@ defmodule JumpExercise.MixProject do
     [
       app: :jump_exercise,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      consolidate_protocols: Mix.env() != :dev,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -24,6 +25,12 @@ defmodule JumpExercise.MixProject do
     ]
   end
 
+  def cli do
+    [
+      preferred_envs: [precommit: :test]
+    ]
+  end
+
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
@@ -33,43 +40,44 @@ defmodule JumpExercise.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:ash_oban, "~> 0.4"},
-      {:usage_rules, "~> 0.1", only: [:dev]},
-      {:ash_ai, "~> 0.1"},
-      {:bcrypt_elixir, "~> 3.0"},
-      {:igniter, "~> 0.6", only: [:dev, :test]},
-      {:ash_authentication_phoenix, "~> 2.0"},
       {:picosat_elixir, "~> 0.2"},
-      {:ash_authentication, "~> 4.0"},
-      {:ash_phoenix, "~> 2.0"},
+      {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_postgres, "~> 2.0"},
-      {:phoenix, "~> 1.7.21"},
+      {:mdex, "~> 0.7"},
+      {:ash_oban, "~> 0.4"},
+      {:ash_phoenix, "~> 2.0"},
+      {:ash_ai, git: "https://github.com/kingdomcoding/ash_ai.git", tag: "6fd948026b11e1cb852855944dfa06d73d33abe1", override: true},
+      {:langchain,
+       git: "https://github.com/brainlid/langchain.git",
+       tag: "5bcc577c1e4e6e3f336f2c612b81f21866000f54",
+       override: true},
+      {:igniter, "~> 0.6", only: [:dev, :test]},
+      {:phoenix, "~> 1.8.2"},
       {:phoenix_ecto, "~> 4.5"},
-      {:ecto_sql, "~> 3.10"},
+      {:ecto_sql, "~> 3.13"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.0"},
-      {:floki, ">= 0.30.0", only: :test},
+      {:phoenix_live_view, "~> 1.1.0"},
+      {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:heroicons,
        github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
+       tag: "v2.2.0",
        sparse: "optimized",
        app: false,
        compile: false,
        depth: 1},
-      {:swoosh, "~> 1.5"},
-      {:finch, "~> 0.13"},
+      {:swoosh, "~> 1.16"},
+      {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.26"},
+      {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
-      {:dns_cluster, "~> 0.1.1"},
+      {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      # TODO: Remove. Prefer req
       {:httpoison, "~> 2.2"}
     ]
   end
@@ -87,13 +95,17 @@ defmodule JumpExercise.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ash.setup --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind jump_exercise", "esbuild jump_exercise"],
+      "assets.build": [
+        "compile",
+        "tailwind jump_exercise",
+        "esbuild jump_exercise"
+      ],
       "assets.deploy": [
         "tailwind jump_exercise --minify",
         "esbuild jump_exercise --minify",
         "phx.digest"
       ],
-      "phx.routes": ["phx.routes", "ash_authentication.phoenix.routes"]
+      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]
   end
 end
