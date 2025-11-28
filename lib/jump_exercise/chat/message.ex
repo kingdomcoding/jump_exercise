@@ -8,16 +8,16 @@ defmodule JumpExercise.Chat.Message do
 
   oban do
     triggers do
-      trigger :respond do
-        actor_persister(JumpExercise.AiAgentActorPersister)
-        action(:respond)
-        queue(:chat_responses)
-        lock_for_update?(false)
-        scheduler_cron(false)
-        worker_module_name(JumpExercise.Chat.Message.Workers.Respond)
-        scheduler_module_name(JumpExercise.Chat.Message.Schedulers.Respond)
-        where expr(needs_response)
-      end
+      # trigger :respond do
+      #   actor_persister(JumpExercise.AiAgentActorPersister)
+      #   action(:respond)
+      #   queue(:chat_responses)
+      #   lock_for_update?(false)
+      #   scheduler_cron(false)
+      #   worker_module_name(JumpExercise.Chat.Message.Workers.Respond)
+      #   scheduler_module_name(JumpExercise.Chat.Message.Schedulers.Respond)
+      #   where expr(needs_response)
+      # end
     end
   end
 
@@ -84,122 +84,122 @@ defmodule JumpExercise.Chat.Message do
     end
   end
 
-  # actions do
-  #   defaults([:destroy])
+  actions do
+    defaults([:destroy])
 
-  #   read :read do
-  #     primary? true
-  #     pagination(keyset?: true, required?: false)
-  #   end
+    read :read do
+      primary? true
+      pagination(keyset?: true, required?: false)
+    end
 
-  #   read :for_conversation do
-  #     pagination(keyset?: true, required?: false)
-  #     argument(:conversation_id, :uuid, allow_nil?: false)
+    read :for_conversation do
+      pagination(keyset?: true, required?: false)
+      argument(:conversation_id, :uuid, allow_nil?: false)
 
-  #     prepare(build(default_sort: [inserted_at: :desc]))
-  #     filter(expr(conversation_id == ^arg(:conversation_id)))
-  #   end
+      prepare(build(default_sort: [inserted_at: :desc]))
+      filter(expr(conversation_id == ^arg(:conversation_id)))
+    end
 
-  #   create :create do
-  #     accept([:text])
+    create :create do
+      accept([:text])
 
-  #     validate match(:text, ~r/\S/) do
-  #       message "Message cannot be empty"
-  #     end
+      validate match(:text, ~r/\S/) do
+        message "Message cannot be empty"
+      end
 
-  #     argument :conversation_id, :uuid do
-  #       public?(false)
-  #     end
+      argument :conversation_id, :uuid do
+        public?(false)
+      end
 
-  #     change(JumpExercise.Chat.Message.Changes.CreateConversationIfNotProvided)
-  #     # change(run_oban_trigger(:respond))
-  #   end
+      change(JumpExercise.Chat.Message.Changes.CreateConversationIfNotProvided)
+      # change(run_oban_trigger(:respond))
+    end
 
-  #   update :respond do
-  #     accept([])
-  #     require_atomic?(false)
-  #     transaction?(false)
-  #     change(JumpExercise.Chat.Message.Changes.Respond)
-  #   end
+    # update :respond do
+    #   accept([])
+    #   require_atomic?(false)
+    #   transaction?(false)
+    #   change(JumpExercise.Chat.Message.Changes.Respond)
+    # end
 
-  #   create :upsert_response do
-  #     upsert?(true)
-  #     accept([:id, :response_to_id, :conversation_id])
-  #     argument(:complete, :boolean, default: false)
-  #     argument(:text, :string, allow_nil?: false, constraints: [trim?: false, allow_empty?: true])
-  #     argument(:tool_calls, {:array, :map})
-  #     argument(:tool_results, {:array, :map})
+    create :upsert_response do
+      upsert?(true)
+      accept([:id, :response_to_id, :conversation_id])
+      argument(:complete, :boolean, default: false)
+      argument(:text, :string, allow_nil?: false, constraints: [trim?: false, allow_empty?: true])
+      argument(:tool_calls, {:array, :map})
+      argument(:tool_results, {:array, :map})
 
-  #     # if updating
-  #     #   if complete, set the text to the provided text
-  #     #   if streaming still, add the text to the provided text
-  #     change(
-  #       atomic_update(
-  #         :text,
-  #         {:atomic,
-  #          expr(
-  #            if ^arg(:complete) do
-  #              ^arg(:text)
-  #            else
-  #              ^atomic_ref(:text) <> ^arg(:text)
-  #            end
-  #          )}
-  #       )
-  #     )
+      # if updating
+      #   if complete, set the text to the provided text
+      #   if streaming still, add the text to the provided text
+      change(
+        atomic_update(
+          :text,
+          {:atomic,
+           expr(
+             if ^arg(:complete) do
+               ^arg(:text)
+             else
+               ^atomic_ref(:text) <> ^arg(:text)
+             end
+           )}
+        )
+      )
 
-  #     change(
-  #       atomic_update(
-  #         :tool_calls,
-  #         {:atomic,
-  #          expr(
-  #            if not is_nil(^arg(:tool_calls)) do
-  #              fragment(
-  #                "? || ?",
-  #                ^atomic_ref(:tool_calls),
-  #                type(
-  #                  ^arg(:tool_calls),
-  #                  {:array, :map}
-  #                )
-  #              )
-  #            else
-  #              ^atomic_ref(:tool_calls)
-  #            end
-  #          )}
-  #       )
-  #     )
+      change(
+        atomic_update(
+          :tool_calls,
+          {:atomic,
+           expr(
+             if not is_nil(^arg(:tool_calls)) do
+               fragment(
+                 "? || ?",
+                 ^atomic_ref(:tool_calls),
+                 type(
+                   ^arg(:tool_calls),
+                   {:array, :map}
+                 )
+               )
+             else
+               ^atomic_ref(:tool_calls)
+             end
+           )}
+        )
+      )
 
-  #     change(
-  #       atomic_update(
-  #         :tool_results,
-  #         {:atomic,
-  #          expr(
-  #            if not is_nil(^arg(:tool_results)) do
-  #              fragment(
-  #                "? || ?",
-  #                ^atomic_ref(:tool_results),
-  #                type(
-  #                  ^arg(:tool_results),
-  #                  {:array, :map}
-  #                )
-  #              )
-  #            else
-  #              ^atomic_ref(:tool_results)
-  #            end
-  #          )}
-  #       )
-  #     )
+      change(
+        atomic_update(
+          :tool_results,
+          {:atomic,
+           expr(
+             if not is_nil(^arg(:tool_results)) do
+               fragment(
+                 "? || ?",
+                 ^atomic_ref(:tool_results),
+                 type(
+                   ^arg(:tool_results),
+                   {:array, :map}
+                 )
+               )
+             else
+               ^atomic_ref(:tool_results)
+             end
+           )}
+        )
+      )
 
-  #     # if creating, set the text attribute to the provided text
-  #     change(set_attribute(:text, arg(:text)))
-  #     change(set_attribute(:complete, arg(:complete)))
-  #     change(set_attribute(:source, :agent))
-  #     change(set_attribute(:tool_results, arg(:tool_results)))
-  #     change(set_attribute(:tool_calls, arg(:tool_calls)))
+      # if creating, set the text attribute to the provided text
+      change(set_attribute(:text, arg(:text)))
+      change(set_attribute(:complete, arg(:complete)))
+      change(set_attribute(:source, :agent))
+      change(set_attribute(:tool_results, arg(:tool_results)))
+      change(set_attribute(:tool_calls, arg(:tool_calls)))
 
-  #     # on update, only set complete to its new value
-  #     upsert_fields([:complete])
-  #   end
-  # end
+      # on update, only set complete to its new value
+      upsert_fields([:complete])
+    end
+  end
 
   calculations do
     calculate :needs_response, :boolean do
