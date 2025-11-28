@@ -107,6 +107,8 @@ defmodule JumpExercise.Chat.Message do
       #   message "Message cannot be empty"
       # end
 
+      validate JumpExercise.Chat.MessageNotEmpty
+
       argument :conversation_id, :uuid do
         public?(false)
       end
