@@ -111,8 +111,8 @@ defmodule JumpExercise.Chat.Message do
         public?(false)
       end
 
-      # # change(JumpExercise.Chat.Message.Changes.CreateConversationIfNotProvided)
-      # change(run_oban_trigger(:respond))
+      change(JumpExercise.Chat.Message.Changes.CreateConversationIfNotProvided)
+      change(run_oban_trigger(:respond))
     end
 
     update :respond do
