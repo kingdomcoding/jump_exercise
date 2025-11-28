@@ -103,9 +103,9 @@ defmodule JumpExercise.Chat.Message do
     create :create do
       accept([:text])
 
-      validate match(:text, ~r/\S/) do
-        message "Message cannot be empty"
-      end
+      # validate match(:text, ~r/\S/) do
+      #   message "Message cannot be empty"
+      # end
 
       argument :conversation_id, :uuid do
         public?(false)
