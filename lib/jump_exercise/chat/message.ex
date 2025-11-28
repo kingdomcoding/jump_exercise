@@ -100,20 +100,20 @@ defmodule JumpExercise.Chat.Message do
       filter(expr(conversation_id == ^arg(:conversation_id)))
     end
 
-    create :create do
-      accept([:text])
+    # create :create do
+    #   accept([:text])
 
-      validate match(:text, ~r/\S/) do
-        message "Message cannot be empty"
-      end
+    #   validate match(:text, ~r/\S/) do
+    #     message "Message cannot be empty"
+    #   end
 
-      argument :conversation_id, :uuid do
-        public?(false)
-      end
+    #   argument :conversation_id, :uuid do
+    #     public?(false)
+    #   end
 
-      change(JumpExercise.Chat.Message.Changes.CreateConversationIfNotProvided)
-      # change(run_oban_trigger(:respond))
-    end
+    #   change(JumpExercise.Chat.Message.Changes.CreateConversationIfNotProvided)
+    #   # change(run_oban_trigger(:respond))
+    # end
 
     # update :respond do
     #   accept([])
