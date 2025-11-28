@@ -39,9 +39,8 @@ defmodule JumpExerciseWeb do
   def controller do
     quote do
       use Phoenix.Controller,
-        formats: [:html, :json],
-        layouts: [html: JumpExerciseWeb.Layouts]
-
+        formats: [:html, :json]
+        
       use Gettext, backend: JumpExerciseWeb.Gettext
 
       import Plug.Conn
@@ -52,8 +51,7 @@ defmodule JumpExerciseWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {JumpExerciseWeb.Layouts, :app}
+      use Phoenix.LiveView
 
       unquote(html_helpers())
     end
