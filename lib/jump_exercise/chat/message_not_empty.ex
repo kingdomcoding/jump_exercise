@@ -1,4 +1,6 @@
 defmodule JumpExercise.Chat.MessageNotEmpty do
+  use Ash.Resource.Validation
+
   @impl true
   def supports(_opts), do: [Ash.Changeset]
 
