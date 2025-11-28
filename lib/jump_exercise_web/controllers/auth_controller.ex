@@ -1,6 +1,7 @@
 defmodule JumpExerciseWeb.AuthController do
   use JumpExerciseWeb, :controller
   use AshAuthentication.Phoenix.Controller
+
   alias JumpExerciseWeb.GoogleOAuth2
 
   def google_callback(conn, %{"code" => code}) do
@@ -44,7 +45,6 @@ defmodule JumpExerciseWeb.AuthController do
   end
 
   def failure(conn, activity, reason) do
-    # dbg(reason)
     message =
       case {activity, reason} do
         {_,

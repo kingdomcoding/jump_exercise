@@ -66,7 +66,7 @@ defmodule JumpExerciseWeb.ChatLive do
                   </div>
                 </div>
                 <div class="chat-bubble">
-                  {message.text}
+                  {to_markdown(message.text)}
                 </div>
               </div>
             <% end %>
@@ -101,9 +101,9 @@ defmodule JumpExerciseWeb.ChatLive do
 
       <div class="drawer-side border-r bg-base-300 min-w-72">
         <div class="py-4 px-6">
-          <.header class="text-lg mb-4">
+          <div class="text-lg mb-4">
             Conversations
-          </.header>
+          </div>
           <div class="mb-4">
             <.link navigate={~p"/chat"} class="btn btn-primary btn-lg mb-2">
               <div class="rounded-full bg-primary-content text-primary w-6 h-6 flex items-center justify-center">
@@ -116,7 +116,7 @@ defmodule JumpExerciseWeb.ChatLive do
             <%= for {id, conversation} <- @streams.conversations do %>
               <li id={id}>
                 <.link
-                  href={~p"/chat/#{conversation.id}"}
+                  navigate={~p"/chat/#{conversation.id}"}
                   phx-click="select_conversation"
                   phx-value-id={conversation.id}
                   class={"block py-2 px-3 transition border-l-4 pl-2 mb-2 #{if @conversation && @conversation.id == conversation.id, do: "border-primary font-medium", else: "border-transparent"}"}
@@ -141,7 +141,11 @@ defmodule JumpExerciseWeb.ChatLive do
   end
 
   def mount(_params, _session, socket) do
-    JumpExerciseWeb.Endpoint.subscribe("chat:conversations:#{socket.assigns.current_user.id}")
+    socket = assign_new(socket, :current_user, fn -> nil end)
+
+    JumpExerciseWeb.Endpoint.subscribe(
+      "chat:conversations:#{socket.assigns.current_user.id}"
+    )
 
     socket =
       socket
@@ -157,14 +161,19 @@ defmodule JumpExerciseWeb.ChatLive do
 
   def handle_params(%{"conversation_id" => conversation_id}, _, socket) do
     conversation =
-      JumpExercise.Chat.get_conversation!(conversation_id, actor: socket.assigns.current_user)
+      JumpExercise.Chat.get_conversation!(conversation_id,
+        actor: socket.assigns.current_user
+      )
 
     cond do
       socket.assigns[:conversation] && socket.assigns[:conversation].id == conversation.id ->
         :ok
 
       socket.assigns[:conversation] ->
-        JumpExerciseWeb.Endpoint.unsubscribe("chat:messages:#{socket.assigns.conversation.id}")
+        JumpExerciseWeb.Endpoint.unsubscribe(
+          "chat:messages:#{socket.assigns.conversation.id}"
+        )
+
         JumpExerciseWeb.Endpoint.subscribe("chat:messages:#{conversation.id}")
 
       true ->
@@ -173,14 +182,19 @@ defmodule JumpExerciseWeb.ChatLive do
 
     socket
     |> assign(:conversation, conversation)
-    |> stream(:messages, JumpExercise.Chat.message_history!(conversation.id, stream?: true))
+    |> stream(
+      :messages,
+      JumpExercise.Chat.message_history!(conversation.id, stream?: true)
+    )
     |> assign_message_form()
     |> then(&{:noreply, &1})
   end
 
   def handle_params(_, _, socket) do
     if socket.assigns[:conversation] do
-      JumpExerciseWeb.Endpoint.unsubscribe("chat:messages:#{socket.assigns.conversation.id}")
+      JumpExerciseWeb.Endpoint.unsubscribe(
+        "chat:messages:#{socket.assigns.conversation.id}"
+      )
     end
 
     socket
@@ -263,5 +277,39 @@ defmodule JumpExerciseWeb.ChatLive do
       :message_form,
       form
     )
+  end
+
+  defp to_markdown(text) do
+    # Note that you must pass the "unsafe: true" option to first generate the raw HTML
+    # in order to sanitize it. https://hexdocs.pm/mdex/MDEx.html#module-sanitize
+    MDEx.to_html(text,
+      extension: [
+        strikethrough: true,
+        tagfilter: true,
+        table: true,
+        autolink: true,
+        tasklist: true,
+        footnotes: true,
+        shortcodes: true
+      ],
+      parse: [
+        smart: true,
+        relaxed_tasklist_matching: true,
+        relaxed_autolinks: true
+      ],
+      render: [
+        github_pre_lang: true,
+        unsafe: true
+      ],
+      sanitize: MDEx.Document.default_sanitize_options()
+    )
+    |> case do
+      {:ok, html} ->
+        html
+        |> Phoenix.HTML.raw()
+
+      {:error, _} ->
+        text
+    end
   end
 end

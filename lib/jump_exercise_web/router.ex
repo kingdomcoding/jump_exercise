@@ -44,10 +44,8 @@ defmodule JumpExerciseWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :redirect_to_chat
-    # redirect "/", "/chat"
     get "/gmail/send_email", GmailController, :send_email
     get "/gmail/fetch_emails", GmailController, :fetch_emails
-
 
     get "/auth/user/google/callback", AuthController, :google_callback
     auth_routes AuthController, JumpExercise.Accounts.User, path: "/auth"
@@ -60,25 +58,31 @@ defmodule JumpExerciseWeb.Router do
                   on_mount: [{JumpExerciseWeb.LiveUserAuth, :live_no_user}],
                   overrides: [
                     JumpExerciseWeb.AuthOverrides,
-                    AshAuthentication.Phoenix.Overrides.Default
+                    Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
                   ]
 
     # Remove this if you do not want to use the reset password feature
     reset_route auth_routes_prefix: "/auth",
                 overrides: [
                   JumpExerciseWeb.AuthOverrides,
-                  AshAuthentication.Phoenix.Overrides.Default
+                  Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
                 ]
 
     # Remove this if you do not use the confirmation strategy
     confirm_route JumpExercise.Accounts.User, :confirm_new_user,
       auth_routes_prefix: "/auth",
-      overrides: [JumpExerciseWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+      overrides: [
+        JumpExerciseWeb.AuthOverrides,
+        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+      ]
 
     # Remove this if you do not use the magic link strategy.
     magic_sign_in_route(JumpExercise.Accounts.User, :magic_link,
       auth_routes_prefix: "/auth",
-      overrides: [JumpExerciseWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+      overrides: [
+        JumpExerciseWeb.AuthOverrides,
+        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+      ]
     )
   end
 
