@@ -112,7 +112,7 @@ defmodule JumpExercise.Chat.Message do
       end
 
       change(JumpExercise.Chat.Message.Changes.CreateConversationIfNotProvided)
-      change(run_oban_trigger(:respond))
+      # change(run_oban_trigger(:respond))
     end
 
     update :respond do
