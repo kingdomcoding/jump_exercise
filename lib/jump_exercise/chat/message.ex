@@ -2,47 +2,46 @@ defmodule JumpExercise.Chat.Message do
   use Ash.Resource,
     otp_app: :jump_exercise,
     domain: JumpExercise.Chat,
-    # extensions: [AshOban],
-    # data_layer: AshPostgres.DataLayer
-    data_layer: Ash.DataLayer.Ets
-    # notifiers: [Ash.Notifier.PubSub]
+    extensions: [AshOban],
+    data_layer: AshPostgres.DataLayer,
+    notifiers: [Ash.Notifier.PubSub]
 
-  # oban do
-  #   triggers do
-  #     trigger :respond do
-  #       actor_persister(JumpExercise.AiAgentActorPersister)
-  #       action(:respond)
-  #       queue(:chat_responses)
-  #       lock_for_update?(false)
-  #       scheduler_cron(false)
-  #       worker_module_name(JumpExercise.Chat.Message.Workers.Respond)
-  #       scheduler_module_name(JumpExercise.Chat.Message.Schedulers.Respond)
-  #       where expr(needs_response)
-  #     end
-  #   end
-  # end
+  oban do
+    triggers do
+      trigger :respond do
+        actor_persister(JumpExercise.AiAgentActorPersister)
+        action(:respond)
+        queue(:chat_responses)
+        lock_for_update?(false)
+        scheduler_cron(false)
+        worker_module_name(JumpExercise.Chat.Message.Workers.Respond)
+        scheduler_module_name(JumpExercise.Chat.Message.Schedulers.Respond)
+        where expr(needs_response)
+      end
+    end
+  end
 
-  # postgres do
-  #   table "messages"
-  #   repo JumpExercise.Repo
-  # end
+  postgres do
+    table "messages"
+    repo JumpExercise.Repo
+  end
 
-  # pub_sub do
-  #   module(JumpExerciseWeb.Endpoint)
-  #   prefix "chat"
+  pub_sub do
+    module(JumpExerciseWeb.Endpoint)
+    prefix "chat"
 
-  #   publish :create, ["messages", :conversation_id] do
-  #     transform(fn %{data: message} ->
-  #       %{text: message.text, id: message.id, source: message.source}
-  #     end)
-  #   end
+    publish :create, ["messages", :conversation_id] do
+      transform(fn %{data: message} ->
+        %{text: message.text, id: message.id, source: message.source}
+      end)
+    end
 
-  #   publish :upsert_response, ["messages", :conversation_id] do
-  #     transform(fn %{data: message} ->
-  #       %{text: message.text, id: message.id, source: message.source}
-  #     end)
-  #   end
-  # end
+    publish :upsert_response, ["messages", :conversation_id] do
+      transform(fn %{data: message} ->
+        %{text: message.text, id: message.id, source: message.source}
+      end)
+    end
+  end
 
   attributes do
     timestamps()
