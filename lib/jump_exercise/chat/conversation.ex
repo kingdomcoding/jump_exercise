@@ -3,7 +3,8 @@ defmodule JumpExercise.Chat.Conversation do
     otp_app: :jump_exercise,
     domain: JumpExercise.Chat,
     # extensions: [AshOban],
-    data_layer: AshPostgres.DataLayer
+    # data_layer: AshPostgres.DataLayer
+    data_layer: Ash.DataLayer.Ets
     # notifiers: [Ash.Notifier.PubSub]
 
   # oban do
@@ -19,10 +20,10 @@ defmodule JumpExercise.Chat.Conversation do
   #   end
   # end
 
-  postgres do
-    table "conversations"
-    repo JumpExercise.Repo
-  end
+  # postgres do
+  #   table "conversations"
+  #   repo JumpExercise.Repo
+  # end
 
   # pub_sub do
   #   module(JumpExerciseWeb.Endpoint)
